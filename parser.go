@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 /*
@@ -71,10 +72,16 @@ func parseList(json string) (List, int) {
 	var val string
 	var inVal bool
 
-	// Iterating over all characters
-	for i := 0; i < len(json); i++ {
+	var char rune
+	var size int
 
-		char := rune(json[i])
+	// Iterating over all characters
+	for i := 0; i < len(json); i += size {
+
+		char, size = utf8.DecodeLastRuneInString(json)
+		if size == 0 {
+			panic("Invalid encoding.")
+		}
 
 		switch state {
 
