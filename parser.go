@@ -78,7 +78,7 @@ func parseList(json string) (List, int) {
 	// Iterating over all characters
 	for i := 0; i < len(json); i += size {
 
-		char, size = utf8.DecodeLastRuneInString(json)
+		char, size = utf8.DecodeRuneInString(json[i:])
 		if size == 0 {
 			panic("Invalid encoding.")
 		}
@@ -196,10 +196,16 @@ func parseObject(json string) (Object, int) {
 	var val string
 	var inVal bool
 
-	// Iterating over all characters
-	for i := 0; i < len(json); i++ {
+	var char rune
+	var size int
 
-		char := rune(json[i])
+	// Iterating over all characters
+	for i := 0; i < len(json); i += size {
+
+		char, size = utf8.DecodeRuneInString(json[i:])
+		if size == 0 {
+			panic("Invalid encoding.")
+		}
 
 		switch state {
 
