@@ -6,6 +6,8 @@ Object (dictionary) type
 package anytype
 
 import (
+	"bytes"
+	"encoding/json"
 	"strings"
 	"sync"
 )
@@ -14,7 +16,7 @@ import (
 Interface for an object.
 
 Extends:
-  - Fielder.
+  - field.
 */
 type Object interface {
 	field
@@ -35,11 +37,12 @@ type Object interface {
 	GetFloat(key string) float64
 	GetBool(key string) bool
 
-	// Type check
-	Type(key string) Type
+	// TypeOf check
+	TypeOf(key string) Type
 
 	// Export
 	String() string
+	FormatString(indent int) string
 	Dict() map[string]any
 	Keys() List
 	Values() List
@@ -105,7 +108,7 @@ Parameters:
 Returns:
   - pointer to the created object.
 */
-func NewObject(vals ...any) *MapObject {
+func NewObject(vals ...any) Object {
 	ego := &MapObject{val: make(map[string]field)}
 	ego.ptr = ego
 	ego.Set(vals...)
@@ -122,7 +125,7 @@ Parameters:
 Returns:
   - created object.
 */
-func NewObjectFrom(dict any) *MapObject {
+func NewObjectFrom(dict any) Object {
 	object := NewObject()
 	switch s := dict.(type) {
 	case map[string]any:
@@ -448,7 +451,7 @@ Parameters:
 Returns:
   - integer constant representing the type (see type enum).
 */
-func (ego *MapObject) Type(key string) Type {
+func (ego *MapObject) TypeOf(key string) Type {
 	ego.assert()
 	switch ego.val[key].(type) {
 	case *atString:
@@ -479,6 +482,24 @@ Returns:
 func (ego *MapObject) String() string {
 	ego.assert()
 	return ego.ptr.serialize()
+}
+
+/*
+Gives a JSON representation of the object in standardized format with the given indentation.
+
+Parameters:
+  - indent - indentation spaces (0-10).
+
+Returns:
+  - JSON string.
+*/
+func (ego *MapObject) FormatString(indent int) string {
+	if indent < 0 || indent > 10 {
+		panic("Invalid indentation.")
+	}
+	buffer := new(bytes.Buffer)
+	json.Indent(buffer, []byte(ego.String()), "", strings.Repeat(" ", indent))
+	return buffer.String()
 }
 
 /*

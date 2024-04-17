@@ -1,11 +1,13 @@
 /*
 AnyType Library for Go
-List type
+List (array) type
 */
 
 package anytype
 
 import (
+	"bytes"
+	"encoding/json"
 	"math"
 	"math/bits"
 	"sort"
@@ -18,7 +20,7 @@ import (
 Interface for a list.
 
 Extends:
-  - Fielder.
+  - field.
 */
 type List interface {
 	field
@@ -42,11 +44,12 @@ type List interface {
 	GetInt(index int) int
 	GetFloat(index int) float64
 
-	// Type check
-	Type(index int) Type
+	// TypeOf check
+	TypeOf(index int) Type
 
 	// Export
 	String() string
+	FormatString(indent int) string
 	Slice() []any
 	ObjectSlice() []Object
 	ListSlice() []List
@@ -151,7 +154,7 @@ Parameters:
 Returns:
   - pointer to the created list.
 */
-func NewList(values ...any) *SliceList {
+func NewList(values ...any) List {
 	ego := &SliceList{val: make([]field, 0)}
 	ego.ptr = ego
 	ego.Add(values...)
@@ -169,7 +172,7 @@ Parameters:
 Returns:
   - pointer to the created list.
 */
-func NewListOf(value any, count int) *SliceList {
+func NewListOf(value any, count int) List {
 	ego := &SliceList{val: make([]field, count)}
 	ego.ptr = ego
 	elem := parseVal(value)
@@ -189,7 +192,7 @@ Parameters:
 Returns:
   - created list.
 */
-func NewListFrom(slice any) *SliceList {
+func NewListFrom(slice any) List {
 	list := NewList()
 	switch s := slice.(type) {
 	case []any:
@@ -558,7 +561,7 @@ Parameters:
 Returns:
   - integer constant representing the type (see type enum).
 */
-func (ego *SliceList) Type(index int) Type {
+func (ego *SliceList) TypeOf(index int) Type {
 	ego.assert()
 	switch ego.val[index].(type) {
 	case *atString:
@@ -589,6 +592,24 @@ Returns:
 func (ego *SliceList) String() string {
 	ego.assert()
 	return ego.ptr.serialize()
+}
+
+/*
+Gives a JSON representation of the list in standardized format with the given indentation.
+
+Parameters:
+  - indent - indentation spaces (0-10).
+
+Returns:
+  - JSON string.
+*/
+func (ego *SliceList) FormatString(indent int) string {
+	if indent < 0 || indent > 10 {
+		panic("Invalid indentation.")
+	}
+	buffer := new(bytes.Buffer)
+	json.Indent(buffer, []byte(ego.String()), "", strings.Repeat(" ", indent))
+	return buffer.String()
 }
 
 /*
@@ -879,15 +900,15 @@ func (ego *SliceList) Sort() List {
 	case *atString:
 		slice := ego.StringSlice()
 		sort.Strings(slice)
-		ego.val = NewListFrom(slice).val
+		ego.val = NewListFrom(slice).(*SliceList).val
 	case *atInt:
 		slice := ego.IntSlice()
 		sort.Ints(slice)
-		ego.val = NewListFrom(slice).val
+		ego.val = NewListFrom(slice).(*SliceList).val
 	case *atFloat:
 		slice := ego.FloatSlice()
 		sort.Float64s(slice)
-		ego.val = NewListFrom(slice).val
+		ego.val = NewListFrom(slice).(*SliceList).val
 	default:
 		panic("List has to be homogeneous with all its elements numeric or strings.")
 	}
@@ -1919,7 +1940,7 @@ func (ego *SliceList) SetTF(tf string, value any) List {
 			object = ego.GetObject(int(integer))
 		} else {
 			object = NewObject()
-			ego.Insert(int(integer), object)
+			ego.ptr.Insert(int(integer), object)
 		}
 		object.SetTF(tf[dot:], value)
 		return ego.ptr
@@ -1934,7 +1955,7 @@ func (ego *SliceList) SetTF(tf string, value any) List {
 			list = ego.GetList(int(integer))
 		} else {
 			list = NewList()
-			ego.Insert(int(integer), list)
+			ego.ptr.Insert(int(integer), list)
 		}
 		list.SetTF(tf[hash:], value)
 		return ego.ptr

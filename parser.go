@@ -6,6 +6,7 @@ JSON parser
 package anytype
 
 import (
+	"fmt"
 	"math/bits"
 	"os"
 	"strconv"
@@ -35,25 +36,26 @@ Parameters:
   - field - field to parse.
 
 Returns:
-  - parsed value (nil, int, float64 or bool).
+  - parsed value (nil, int, float64 or bool),
+  - error if any occurred.
 */
-func parseField(field string) any {
+func parseField(field string) (any, error) {
 	if field == "null" {
-		return nil
+		return nil, nil
 	}
 	integer, err := strconv.ParseInt(field, 0, bits.UintSize)
 	if err == nil {
-		return int(integer)
+		return int(integer), nil
 	}
 	float, err := strconv.ParseFloat(field, bits.UintSize)
 	if err == nil {
-		return float
+		return float, nil
 	}
 	boolean, err := strconv.ParseBool(field)
 	if err == nil {
-		return boolean
+		return boolean, nil
 	}
-	panic("Not a valid JSON - Invalid value '" + field + "'.")
+	return nil, fmt.Errorf("not a valid JSON - Invalid value '%s'", field)
 }
 
 /*
@@ -63,9 +65,10 @@ Patameters:
 
 Returns:
   - created list,
-  - number of chars processed.
+  - number of bytes processed,
+  - error if any occurred.
 */
-func parseList(json string) (List, int) {
+func parseList(json string) (List, int, error) {
 
 	state := stateStart
 	var list List
@@ -80,7 +83,7 @@ func parseList(json string) (List, int) {
 
 		char, size = utf8.DecodeRuneInString(json[i:])
 		if size == 0 {
-			panic("Invalid encoding.")
+			return nil, 0, fmt.Errorf("invalid encoding")
 		}
 
 		switch state {
@@ -88,7 +91,7 @@ func parseList(json string) (List, int) {
 		// List creation
 		case stateStart:
 			if char != '[' {
-				panic("Not a valid JSON - Expecting '{', got '" + string(char) + "'.")
+				return nil, 0, fmt.Errorf("not a valid JSON - Expecting '{', got '%s'", string(char))
 			}
 			list = NewList()
 			state = stateVal
@@ -112,7 +115,10 @@ func parseList(json string) (List, int) {
 			// Recursive call with original string starting from current position
 			// Current index is moved after the nested object so the parsing can continue
 			if !inVal && char == '{' {
-				o, pos := parseObject(json[i:])
+				o, pos, err := parseObject(json[i:])
+				if err != nil {
+					return nil, 0, err
+				}
 				i += pos
 				list.Add(o)
 				continue
@@ -120,7 +126,10 @@ func parseList(json string) (List, int) {
 
 			// Nested list (same as above)
 			if !inVal && char == '[' {
-				l, pos := parseList(json[i:])
+				l, pos, err := parseList(json[i:])
+				if err != nil {
+					return nil, 0, err
+				}
 				i += pos
 				list.Add(l)
 				continue
@@ -129,12 +138,16 @@ func parseList(json string) (List, int) {
 			// End of the element
 			if char == ',' || char == ']' {
 				if len(val) > 0 {
-					list.Add(parseField(val))
+					field, err := parseField(val)
+					if err != nil {
+						return nil, 0, err
+					}
+					list.Add(field)
 					val = ""
 					inVal = false
 				}
 				if char == ']' {
-					return list, i
+					return list, i, nil
 				}
 				continue
 			}
@@ -168,14 +181,14 @@ func parseList(json string) (List, int) {
 				state = stateVal
 				continue
 			} else if char == ']' {
-				return list, i
+				return list, i, nil
 			}
 
 		}
 	}
 
-	// No matching rule - panic
-	panic("Not a valid JSON - Unexpected end of input.")
+	// No matching rule - error
+	return nil, 0, fmt.Errorf("not a valid JSON - unexpected end of input")
 
 }
 
@@ -186,9 +199,10 @@ Patameters:
 
 Returns:
   - created object,
-  - number of chars processed.
+  - number of bytes processed,
+  - error if any occurred.
 */
-func parseObject(json string) (Object, int) {
+func parseObject(json string) (Object, int, error) {
 
 	state := stateStart
 	var object Object
@@ -204,7 +218,7 @@ func parseObject(json string) (Object, int) {
 
 		char, size = utf8.DecodeRuneInString(json[i:])
 		if size == 0 {
-			panic("Invalid encoding.")
+			return nil, 0, fmt.Errorf("invalid encoding")
 		}
 
 		switch state {
@@ -212,7 +226,7 @@ func parseObject(json string) (Object, int) {
 		// List creation
 		case stateStart:
 			if char != '{' {
-				panic("Not a valid JSON - Expecting '{', got '" + string(char) + "'.")
+				return nil, 0, fmt.Errorf("not a valid JSON - expecting '{', got '%s'", string(char))
 			}
 			object = NewObject()
 			state = stateKeyStart
@@ -223,14 +237,14 @@ func parseObject(json string) (Object, int) {
 				continue
 			}
 			if char == '}' {
-				return object, i
+				return object, i, nil
 			}
 			if char == '"' {
 				key = ""
 				state = stateKey
 				continue
 			}
-			panic(`Not a valid JSON - Expecting '"', got '` + string(char) + `'.`)
+			return nil, 0, fmt.Errorf("not a valid JSON - Expecting '\"', got '%s'", string(char))
 
 		// Parsing the key
 		case stateKey:
@@ -253,7 +267,7 @@ func parseObject(json string) (Object, int) {
 				continue
 			}
 			if char != ':' {
-				panic("Not a valid JSON - Expecting ':', got '" + string(char) + "'.")
+				return nil, 0, fmt.Errorf("not a valid JSON - Expecting ':', got '%s'", string(char))
 			}
 			val = ""
 			state = stateVal
@@ -277,7 +291,10 @@ func parseObject(json string) (Object, int) {
 			// Recursive call with original string starting from current position
 			// Current index is moved after the nested object so the parsing can continue
 			if !inVal && char == '{' {
-				o, pos := parseObject(json[i:])
+				o, pos, err := parseObject(json[i:])
+				if err != nil {
+					return nil, 0, err
+				}
 				i += pos
 				object.Set(key, o)
 				continue
@@ -285,7 +302,10 @@ func parseObject(json string) (Object, int) {
 
 			// Nested list (same as above)
 			if !inVal && char == '[' {
-				l, pos := parseList(json[i:])
+				l, pos, err := parseList(json[i:])
+				if err != nil {
+					return nil, 0, err
+				}
 				i += pos
 				object.Set(key, l)
 				continue
@@ -294,13 +314,17 @@ func parseObject(json string) (Object, int) {
 			// End of the value
 			if char == ',' || char == '}' {
 				if len(val) > 0 {
-					object.Set(key, parseField(val))
+					field, err := parseField(val)
+					if err != nil {
+						return nil, 0, err
+					}
+					object.Set(key, field)
 				}
 				if char == ',' {
 					state = stateKeyStart
 					continue
 				} else if char == '}' {
-					return object, i
+					return object, i, nil
 				}
 			}
 
@@ -332,15 +356,29 @@ func parseObject(json string) (Object, int) {
 				state = stateKeyStart
 				continue
 			} else if char == '}' {
-				return object, i
+				return object, i, nil
 			}
 
 		}
 	}
 
-	// No matching rule - panic
-	panic("Not a valid JSON - Unexpected end of input.")
+	// No matching rule - error
+	return nil, 0, fmt.Errorf("not a valid JSON - Unexpected end of input")
 
+}
+
+/*
+Creates a new list from JSON.
+Patameters:
+  - json - JSON string to parse.
+
+Returns:
+  - created list,
+  - error if any occurred.
+*/
+func ParseList(json string) (List, error) {
+	root, _, err := parseList(strings.TrimSpace(json))
+	return root, err
 }
 
 /*
@@ -349,11 +387,12 @@ Patameters:
   - json - JSON string to parse.
 
 Returns:
-  - created object.
+  - created object,
+  - error if any occurred.
 */
-func ParseJson(json string) Object {
-	root, _ := parseObject(strings.TrimSpace(json))
-	return root
+func ParseObject(json string) (Object, error) {
+	root, _, err := parseObject(strings.TrimSpace(json))
+	return root, err
 }
 
 /*
@@ -362,12 +401,13 @@ Patameters:
   - path - path to the file to parse.
 
 Returns:
-  - created object.
+  - created object,
+  - error if any occurred.
 */
-func ParseFile(path string) Object {
+func ParseFile(path string) (Object, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return ParseJson(string(data))
+	return ParseObject(string(data))
 }

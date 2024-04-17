@@ -77,25 +77,25 @@ func TestObject(t *testing.T) {
 			"float", 3.14,
 			"nil", nil,
 		)
-		if o.Type("object") != anytype.TypeObject {
+		if o.TypeOf("object") != anytype.TypeObject {
 			t.Error("Field should be an object.")
 		}
-		if o.Type("list") != anytype.TypeList {
+		if o.TypeOf("list") != anytype.TypeList {
 			t.Error("Field should be a list.")
 		}
-		if o.Type("string") != anytype.TypeString {
+		if o.TypeOf("string") != anytype.TypeString {
 			t.Error("Field should be a string.")
 		}
-		if o.Type("bool") != anytype.TypeBool {
+		if o.TypeOf("bool") != anytype.TypeBool {
 			t.Error("Field should be a bool.")
 		}
-		if o.Type("int") != anytype.TypeInt {
+		if o.TypeOf("int") != anytype.TypeInt {
 			t.Error("Field should be an int.")
 		}
-		if o.Type("float") != anytype.TypeFloat {
+		if o.TypeOf("float") != anytype.TypeFloat {
 			t.Error("Field should be a float.")
 		}
-		if o.Type("nil") != anytype.TypeNil {
+		if o.TypeOf("nil") != anytype.TypeNil {
 			t.Error("Field should be nil.")
 		}
 	})
@@ -286,7 +286,7 @@ func TestList(t *testing.T) {
 
 	t.Run("basics", func(t *testing.T) {
 		l := List(1, 2, 3)
-		if l.Type(0) != anytype.TypeInt {
+		if l.TypeOf(0) != anytype.TypeInt {
 			t.Error("Element has a wrong type.")
 		}
 		if !l.Insert(1, 4).Equals(List(1, 4, 2, 3)) {
@@ -340,25 +340,25 @@ func TestList(t *testing.T) {
 			3.14,
 			nil,
 		)
-		if l.Type(0) != anytype.TypeObject {
+		if l.TypeOf(0) != anytype.TypeObject {
 			t.Error("Element should be an object.")
 		}
-		if l.Type(1) != anytype.TypeList {
+		if l.TypeOf(1) != anytype.TypeList {
 			t.Error("Element should be a list.")
 		}
-		if l.Type(2) != anytype.TypeString {
+		if l.TypeOf(2) != anytype.TypeString {
 			t.Error("Element should be a string.")
 		}
-		if l.Type(3) != anytype.TypeBool {
+		if l.TypeOf(3) != anytype.TypeBool {
 			t.Error("Element should be a bool.")
 		}
-		if l.Type(4) != anytype.TypeInt {
+		if l.TypeOf(4) != anytype.TypeInt {
 			t.Error("Element should be an int.")
 		}
-		if l.Type(5) != anytype.TypeFloat {
+		if l.TypeOf(5) != anytype.TypeFloat {
 			t.Error("Element should be a float.")
 		}
-		if l.Type(6) != anytype.TypeNil {
+		if l.TypeOf(6) != anytype.TypeNil {
 			t.Error("Element should be nil.")
 		}
 	})
@@ -729,21 +729,56 @@ func TestList(t *testing.T) {
 }
 
 func TestParsing(t *testing.T) {
-	t.Run("json", func(t *testing.T) {
+	t.Run("object", func(t *testing.T) {
 		o := Object(
 			"object", Object(
 				"test", 0,
 				"innerList", List(0, 1, Object(), "2"),
 			),
-			"list", List(nil, false, 42, 1.6, "\"something\"", Object("\"1\"", 1), List(0)),
-			"string", "\"test\"",
+			"list", List(nil, false, 42, 1.6, "\"Žř@,./'á?\"", Object("\"1\"", "\"1\""), List(0)),
+			"string", "test",
 			"bool", true,
 			"int", 1,
 			"float", 3.14,
 			"nil", nil,
 		)
-		if !anytype.ParseJson(o.String()).Equals(o) {
-			t.Error("JSON parsing or exporting does not work properly.")
+		parsed, err := anytype.ParseObject(o.String())
+		if err != nil {
+			t.Error("JSON parser failed.")
+		}
+		if !parsed.Equals(o) {
+			t.Error("JSON parsing or exporting of object does not work properly.")
+		}
+	})
+
+	t.Run("list", func(t *testing.T) {
+		l := List(nil, false, 42, 1.6, "\"Žř@,./'á?\"", List(0, "1"), Object(
+			"bool", true,
+			"int", 1,
+			"float", 3.14,
+			"innerList", List(0, 1, Object(), "2"),
+			"nil", nil,
+			"string", "test",
+		))
+		parsed, err := anytype.ParseList(l.String())
+		if err != nil {
+			t.Error("JSON parser failed.")
+		}
+		if !parsed.Equals(l) {
+			t.Error("JSON parsing or exporting of list does not work properly.")
+		}
+	})
+
+	t.Run("indent", func(t *testing.T) {
+		l := List(1, 2)
+		if l.FormatString(2) != "[\n  1,\n  2\n]" {
+			t.Error("JSON formatted export does not work properly.")
+		}
+		o := Object(
+			"key", "value",
+		)
+		if o.FormatString(2) != "{\n  \"key\": \"value\"\n}" {
+			t.Error("JSON formatted export does not work properly.")
 		}
 	})
 
