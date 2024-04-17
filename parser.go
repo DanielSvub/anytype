@@ -39,7 +39,7 @@ Returns:
   - parsed value (nil, int, float64 or bool),
   - error if any occurred.
 */
-func parseField(field string) (any, error) {
+func parseField(field string, line int) (any, error) {
 	if field == "null" {
 		return nil, nil
 	}
@@ -55,20 +55,21 @@ func parseField(field string) (any, error) {
 	if err == nil {
 		return boolean, nil
 	}
-	return nil, fmt.Errorf("not a valid JSON - Invalid value '%s'", field)
+	return nil, fmt.Errorf("not a valid JSON - invalid value '%s' on line %d", field, line)
 }
 
 /*
 Recursively parses a JSON list.
 Patameters:
-  - json - JSON string to parse.
+  - json - JSON string to parse,
+  - line - current line of the input.
 
 Returns:
   - created list,
   - number of bytes processed,
   - error if any occurred.
 */
-func parseList(json string) (List, int, error) {
+func parseList(json string, line int) (List, int, error) {
 
 	state := stateStart
 	var list List
@@ -83,7 +84,7 @@ func parseList(json string) (List, int, error) {
 
 		char, size = utf8.DecodeRuneInString(json[i:])
 		if size == 0 {
-			return nil, 0, fmt.Errorf("invalid encoding")
+			return nil, 0, fmt.Errorf("not an UTF-8 encoding")
 		}
 
 		switch state {
@@ -91,7 +92,7 @@ func parseList(json string) (List, int, error) {
 		// List creation
 		case stateStart:
 			if char != '[' {
-				return nil, 0, fmt.Errorf("not a valid JSON - Expecting '{', got '%s'", string(char))
+				return nil, 0, fmt.Errorf("not a valid JSON - expecting '[', got '%s' on line %d", string(char), line)
 			}
 			list = NewList()
 			state = stateVal
@@ -102,6 +103,9 @@ func parseList(json string) (List, int, error) {
 
 			// Whitespace (skipping)
 			if unicode.IsSpace(char) {
+				if char == '\n' {
+					line++
+				}
 				continue
 			}
 
@@ -115,7 +119,7 @@ func parseList(json string) (List, int, error) {
 			// Recursive call with original string starting from current position
 			// Current index is moved after the nested object so the parsing can continue
 			if !inVal && char == '{' {
-				o, pos, err := parseObject(json[i:])
+				o, pos, err := parseObject(json[i:], line)
 				if err != nil {
 					return nil, 0, err
 				}
@@ -126,7 +130,7 @@ func parseList(json string) (List, int, error) {
 
 			// Nested list (same as above)
 			if !inVal && char == '[' {
-				l, pos, err := parseList(json[i:])
+				l, pos, err := parseList(json[i:], line)
 				if err != nil {
 					return nil, 0, err
 				}
@@ -138,7 +142,7 @@ func parseList(json string) (List, int, error) {
 			// End of the element
 			if char == ',' || char == ']' {
 				if len(val) > 0 {
-					field, err := parseField(val)
+					field, err := parseField(val, line)
 					if err != nil {
 						return nil, 0, err
 					}
@@ -195,14 +199,15 @@ func parseList(json string) (List, int, error) {
 /*
 Recursively parses a JSON object.
 Patameters:
-  - json - JSON string to parse.
+  - json - JSON string to parse,
+  - line - current line of the input.
 
 Returns:
   - created object,
   - number of bytes processed,
   - error if any occurred.
 */
-func parseObject(json string) (Object, int, error) {
+func parseObject(json string, line int) (Object, int, error) {
 
 	state := stateStart
 	var object Object
@@ -218,7 +223,7 @@ func parseObject(json string) (Object, int, error) {
 
 		char, size = utf8.DecodeRuneInString(json[i:])
 		if size == 0 {
-			return nil, 0, fmt.Errorf("invalid encoding")
+			return nil, 0, fmt.Errorf("not an UTF-8 encoding")
 		}
 
 		switch state {
@@ -226,7 +231,7 @@ func parseObject(json string) (Object, int, error) {
 		// List creation
 		case stateStart:
 			if char != '{' {
-				return nil, 0, fmt.Errorf("not a valid JSON - expecting '{', got '%s'", string(char))
+				return nil, 0, fmt.Errorf("not a valid JSON - expecting '{', got '%s' on line %d", string(char), line)
 			}
 			object = NewObject()
 			state = stateKeyStart
@@ -234,6 +239,9 @@ func parseObject(json string) (Object, int, error) {
 		// Begining of a key
 		case stateKeyStart:
 			if unicode.IsSpace(char) {
+				if char == '\n' {
+					line++
+				}
 				continue
 			}
 			if char == '}' {
@@ -244,7 +252,7 @@ func parseObject(json string) (Object, int, error) {
 				state = stateKey
 				continue
 			}
-			return nil, 0, fmt.Errorf("not a valid JSON - Expecting '\"', got '%s'", string(char))
+			return nil, 0, fmt.Errorf("not a valid JSON - expecting '\"', got '%s' on line %d", string(char), line)
 
 		// Parsing the key
 		case stateKey:
@@ -264,10 +272,13 @@ func parseObject(json string) (Object, int, error) {
 		// Waiting for colon
 		case stateAfterKey:
 			if unicode.IsSpace(char) {
+				if char == '\n' {
+					line++
+				}
 				continue
 			}
 			if char != ':' {
-				return nil, 0, fmt.Errorf("not a valid JSON - Expecting ':', got '%s'", string(char))
+				return nil, 0, fmt.Errorf("not a valid JSON - expecting ':', got '%s' on line %d", string(char), line)
 			}
 			val = ""
 			state = stateVal
@@ -278,6 +289,9 @@ func parseObject(json string) (Object, int, error) {
 
 			// Whitespace (skipping)
 			if unicode.IsSpace(char) {
+				if char == '\n' {
+					line++
+				}
 				continue
 			}
 
@@ -291,7 +305,7 @@ func parseObject(json string) (Object, int, error) {
 			// Recursive call with original string starting from current position
 			// Current index is moved after the nested object so the parsing can continue
 			if !inVal && char == '{' {
-				o, pos, err := parseObject(json[i:])
+				o, pos, err := parseObject(json[i:], line)
 				if err != nil {
 					return nil, 0, err
 				}
@@ -302,7 +316,7 @@ func parseObject(json string) (Object, int, error) {
 
 			// Nested list (same as above)
 			if !inVal && char == '[' {
-				l, pos, err := parseList(json[i:])
+				l, pos, err := parseList(json[i:], line)
 				if err != nil {
 					return nil, 0, err
 				}
@@ -314,7 +328,7 @@ func parseObject(json string) (Object, int, error) {
 			// End of the value
 			if char == ',' || char == '}' {
 				if len(val) > 0 {
-					field, err := parseField(val)
+					field, err := parseField(val, line)
 					if err != nil {
 						return nil, 0, err
 					}
@@ -363,7 +377,7 @@ func parseObject(json string) (Object, int, error) {
 	}
 
 	// No matching rule - error
-	return nil, 0, fmt.Errorf("not a valid JSON - Unexpected end of input")
+	return nil, 0, fmt.Errorf("not a valid JSON - unexpected end of input")
 
 }
 
@@ -377,7 +391,11 @@ Returns:
   - error if any occurred.
 */
 func ParseList(json string) (List, error) {
-	root, _, err := parseList(strings.TrimSpace(json))
+	start := strings.Index(json, "[")
+	if start < 0 {
+		return nil, fmt.Errorf("not a valid JSON - missing '['")
+	}
+	root, _, err := parseList(json[start:], strings.Count(json[:start], "\n")+1)
 	return root, err
 }
 
@@ -391,7 +409,11 @@ Returns:
   - error if any occurred.
 */
 func ParseObject(json string) (Object, error) {
-	root, _, err := parseObject(strings.TrimSpace(json))
+	start := strings.Index(json, "{")
+	if start < 0 {
+		return nil, fmt.Errorf("not a valid JSON - missing '{'")
+	}
+	root, _, err := parseObject(json[start:], strings.Count(json[:start], "\n")+1)
 	return root, err
 }
 
