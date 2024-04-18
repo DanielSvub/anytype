@@ -1,6 +1,6 @@
 # AnyType
 
-AnyType is a Go library providing dynamic data structures with a JSON support. It contains a number of advanced features with API inspired by Java collections.
+AnyType is a Go library providing dynamic data structures with JSON support. It contains a number of advanced features with API inspired by Java collections.
 
 It supports following data types compatible with JSON standard:
 - string
@@ -11,57 +11,284 @@ It supports following data types compatible with JSON standard:
 - list (array)
 - nil (null)
 
+Types can be referenced by the `Type` enum (e.g. `anytype.TypeObject`, `anytype.TypeInt`, ...).
+
 ## Objects
 
-Object is an unordered set of key-value pairs. The default implementation, `mapObject` structure, is based on built-in Go maps. It is possible to make custom implementations by implementing the `Object` interface.
+Object is an unordered set of key-value pairs. The default implementation, `MapObject` structure, is based on built-in Go maps. It is possible to make custom implementations by implementing the `Object` interface.
+
+### Constructors
+
+- `NewObject(vals ...any) Object` - Initial object values are specified as key value pairs. The function panics if an odd number of arguments is given,
+```go
+emptyObject := anytype.NewObject()
+object := anytype.NewObject(
+    "first", 1,
+    "second", 2, 
+)
+```
+
+- `NewObjectFrom(dict any) Object` - object can be also created from a given Go map. Any map with string as a key and a compatible type as a value can be used,
+```go
+object := anytype.NewObjectFrom(map[string]int{
+	"first":  1,
+	"second": 2,
+})
+```
+
+- `ParseObject(json string) (Object, error)` - loads an object from a JSON string,
+```go
+object, err := anytype.ParseObject(`{"first":1,"second":2}`)
+if err != nil {
+    ...
+}
+```
+
+- `ParseFile(path string) (Object, error)` - loads an object from an UTF-8 encoded JSON file.
+```go
+object, err := anytype.ParseFile("file.json")
+if err != nil {
+    ...
+}
+```
 
 ### Manipulation With Fields
-- `Set(values ...any) Object`
-- `Unset(keys ...string) Object`
-- `Clear() Object`
+- `Set(values ...any) Object` - multiple new values can be set as key-value pairs, analogically to the constructor,
+```go
+object.Set(
+    "first", 1,
+    "second", 2, 
+)
+```
+
+- `Unset(keys ...string) Object` - removes the given keys from the object,
+```go
+object.Unset("first", "second")
+```
+
+- `Clear() Object` - removes all keys from the object.
+```go
+object.Clear()
+```
 
 ### Getting Fields
-- `Get(key string) any`
-- `GetObject(key string) Object`
+- Universal getter (requires type assertion),
+```go
+nested := object.Get("nested").(anytype.Object)
+list := object.Get("list").(anytype.List)
+str := object.Get("str").(string)
+boolean := object.Get("boolean").(bool)
+integer := object.Get("integer").(int)
+float := object.Get("float").(float64)
+```
+
+- type-specific getters.
+```go
+nested := object.GetObject("nested")
+list := object.GetList("list")
+str := object.GetString("str")
+boolean := object.GetBool("boolean")
+integer := object.GetInt("integer")
+float := object.GetFloat("float")
+```
 
 ### Type Check
-- `TypeOf(key string) Type`
+- `TypeOf(key string) Type`.
+```go
+if object.TypeOf("integer") == anytype.TypeInt {
+    ...
+}
+```
 
 ### Export
-- `String() string`
-- `FormatString(indent int) string`
+- `String() string` - exports the object to a JSON string,
+```go
+fmt.Println(object.String())
+```
+
+- `FormatString(indent int) string` - exports the object to a well-arranged JSON string with the given indentation, 
+```go
+fmt.Println(object.FormatString(4))
+```
+
 - `Dict() map[string]any`
-- `Keys() List`
-- `Values() List`
+```go
+var dict map[string]any
+dict = object.Dict()
+```
+
+- `Keys() List` - exports all keys of the object to an AnyType list,
+```go
+var keys anytype.List
+keys = object.Keys()
+```
+
+- `Values() List` - exports all values of the object to an AnyType list.
+```go
+var values anytype.List
+values = object.Values()
+```
 
 ### Features Over Whole Object
-- `Clone() Object`
-- `Count() int`
-- `Empty() bool`
-- `Equals(another Object) bool`
-- `Merge(another Object) Object`
-- `Pluck(keys ...string) Object`
-- `Contains(elem any) bool`
-- `KeyOf(elem any) string`
-- `KeyExists(key string) bool`
+- `Clone() Object` - performs a deep copy of the object,
+```go
+copy := object.Clone()
+```
+
+- `Count() int` - returns a number of fileds of the object,
+```go
+for i := 0; i < object.Count(); i++ {
+    ...
+}
+```
+
+- `Empty() bool` - checks whether the object is empty (has 0 fields),
+```go
+if object.Empty() {
+    ...
+}
+```
+
+- `Equals(another Object) bool` - checks whether all fields of the object are equal to the fields in another object,
+```go
+if object.Equals(another) {
+    ...
+}
+```
+
+- `Merge(another Object) Object` - merges two objects together,
+```go
+merged := object.Merge(another)
+```
+
+- `Pluck(keys ...string) Object` - creates a new object containing only the selected keys from existing object,
+```go
+plucked := object.Pluck("first", "second")
+```
+
+- `Contains(elem any) bool` - checks whether the objects contains a value,
+```go
+if object.Contains(1) {
+    ...
+}
+```
+
+- `KeyOf(elem any) string` - returns any key containing the given value,
+```go
+first := object.KeyOf(1)
+```
+
+- `KeyExists(key string) bool` - checks whether a key exists in the object.
+```go
+if object.KeyExists("first") {
+    ...
+}
+```
 
 ### ForEaches
-- `ForEach(function func(string, any)) Object`
-- `ForEachValue(function func(any)) Object`
-- `ForEachObject(function func(Object)) Object`
+- `ForEach(function func(string, any)) Object` - executes a given function over an every field of the object,
+```go
+object.ForEach(func(key string, value any) {
+    ...
+})
+```
+
+- `ForEachValue(function func(any)) Object` - ForEach without the key variable within the anonymous function,
+```go
+object.ForEachValue(func(value any) {
+    ...
+})
+```
+
+- type-specific ForEaches - anonymous function is only executed over values with the corresponding type.
+```go
+object.ForEachObject(func(object anytype.Object) {
+    ...
+})
+object.ForEachList(func(list anytype.List) {
+    ...
+})
+object.ForEachString(func(str string) {
+    ...
+})
+object.ForEachBool(func(object bool) {
+    ...
+})
+object.ForEachInt(func(integer int) {
+    ...
+})
+object.ForEachFloat(func(float float64) {
+    ...
+})
+```
 
 ### Mapping
-- `Map(function func(string, any) any) Object`
-- `MapValues(function func(any) any) Object`
-- `MapObjects(function func(Object) any) Object`
+- `Map(function func(string, any) any) Object` - returns a new object with fields modified by a given function,
+```go
+mapped := object.Map(func(key string, value any) any {
+    ...
+	return newValue
+})
+```
+
+- `MapValues(function func(any) any) Object` - Map without the key variable within the anonymous function,
+```go
+mapped := object.MapValues(func(value any) any {
+    ...
+	return newValue
+})
+```
+
+- type-specific Maps - selects only fields with the corresponding type.
+```go
+objects := object.MapObjects(func(object anytype.Object) any {
+    ...
+	return newValue
+})
+lists := object.MapLists(func(object anytype.List) any {
+    ...
+	return newValue
+})
+strs := object.MapStrings(func(object string) any {
+    ...
+	return newValue
+})
+integers := object.MapInts(func(object int) any {
+    ...
+	return newValue
+})
+floats := object.MapFloats(func(object float64) any {
+    ...
+	return newValue
+})
+```
 
 ### Async
-- `ForEachAsync(function func(string, any)) Object`
-- `MapAsync(function func(string, any) any) Object`
+- `ForEachAsync(function func(string, any)) Object` - performs the ForEach paralelly,
+```go
+object.ForEachAsync(func(key string, value any) {
+    ...
+})
+```
+
+- `MapAsync(function func(string, any) any) Object` - performs the Map paralelly.
+```go
+mapped := object.MapAsync(func(key string, value any) any {
+    ...
+	return newValue
+})
+```
 
 ### Tree Form
-- `GetTF(tf string) any`
-- `SetTF(tf string, value any) Object`
+- `GetTF(tf string) any` - returns a value specified by the given tree form string,
+```go
+value := object.GetTF(".first#2")
+```
+
+- `SetTF(tf string, value any) Object` - sets a value on the path specified by the given tree form string.
+```go
+object.SetTF(".first#2", 2)
+```
 
 ## Lists
 
@@ -170,8 +397,3 @@ List is an ordered sequence of values. The default implementation, `sliceList` s
 ### Tree Form
 - `GetTF(tf string) any`
 - `SetTF(tf string, value any) List`
-
-## JSON
-
-AnyType objects can be created from a JSON string using `ParseJson(json string) Object` or `ParseFile(path string) Object` functions.
-
