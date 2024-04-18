@@ -6,8 +6,8 @@ Type enum, field interface, atomic types
 package anytype
 
 import (
+	"math"
 	"strconv"
-	"strings"
 )
 
 /*
@@ -163,8 +163,7 @@ Returns:
 */
 func (ego *atString) serialize() string {
 	val := ego.getVal().(string)
-	result := strings.Replace(val, `"`, `\"`, -1)
-	return `"` + result + `"`
+	return strconv.Quote(val)
 }
 
 /*
@@ -352,7 +351,11 @@ Returns:
   - string representing serialized field.
 */
 func (ego *atFloat) serialize() string {
-	return strconv.FormatFloat(ego.getVal().(float64), 'f', -1, 64)
+	val := ego.getVal().(float64)
+	if val >= math.Pow10(6) || val <= math.Pow10(-6) {
+		return strconv.FormatFloat(val, 'e', -1, 64)
+	}
+	return strconv.FormatFloat(val, 'f', -1, 64)
 }
 
 /*

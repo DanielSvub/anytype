@@ -25,10 +25,11 @@ Object is an unordered set of key-value pairs. The default implementation, `mapO
 - `GetObject(key string) Object`
 
 ### Type Check
-- `Type(key string) Type`
+- `TypeOf(key string) Type`
 
 ### Export
 - `String() string`
+- `FormatString(indent int) string`
 - `Dict() map[string]any`
 - `Keys() List`
 - `Values() List`
@@ -84,10 +85,11 @@ List is an ordered sequence of values. The default implementation, `sliceList` s
 - `GetFloat(index int) float64`
 
 ### Type Check
-- `Type(index int) Type`
+- `TypeOf(index int) Type`
 
 ### Export
 - `String() string`
+- `FormatString(indent int) string`
 - `Slice() []any`
 - `ObjectSlice() []Object`
 - `ListSlice() []List`

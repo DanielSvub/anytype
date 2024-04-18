@@ -732,10 +732,10 @@ func TestParsing(t *testing.T) {
 	t.Run("object", func(t *testing.T) {
 		o := Object(
 			"object", Object(
-				"test", 0,
+				"\"tes\u0074\n\"", 0,
 				"innerList", List(0, 1, Object(), "2"),
 			),
-			"list", List(nil, false, 42, 1.6, "\"Žř@,./'á?\"", Object("\"1\"", "\"1\""), List(0)),
+			"list", List(nil, false, 42, 1.6e-8, "\"Žř@./'á?\u0041\n\\\"", Object("\"1\"", "\"1\""), List(0)),
 			"string", "test",
 			"bool", true,
 			"int", 1,
@@ -752,7 +752,7 @@ func TestParsing(t *testing.T) {
 	})
 
 	t.Run("list", func(t *testing.T) {
-		l := List(nil, false, 42, 1.6, "\"Žř@,./'á?\"", List(0, "1"), Object(
+		l := List(nil, false, 42, 1.6, "\"Žř@./'á?\u0041\n\\\"", List(0, "1"), Object(
 			"bool", true,
 			"int", 1,
 			"float", 3.14,

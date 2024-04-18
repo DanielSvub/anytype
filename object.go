@@ -8,6 +8,8 @@ package anytype
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -210,9 +212,7 @@ func (ego *MapObject) serialize() string {
 	result := "{"
 	i := 0
 	for field, value := range ego.val {
-		field := strings.Replace(field, `"`, `\"`, -1)
-		result += `"` + field + `":`
-		result += value.serialize()
+		result += fmt.Sprintf("%s:%s", strconv.Quote(field), value.serialize())
 		if i++; i < len(ego.val) {
 			result += ","
 		}

@@ -167,7 +167,11 @@ func parseList(json string, line int) (List, int, error) {
 				continue
 			}
 			if char == '"' {
-				list.Add(val)
+				str, err := strconv.Unquote(fmt.Sprintf(`"%s"`, val))
+				if err != nil {
+					return nil, 0, err
+				}
+				list.Add(str)
 				val = ""
 				state = stateValAfterString
 				continue
@@ -176,7 +180,7 @@ func parseList(json string, line int) (List, int, error) {
 
 		// Escaping inside string
 		case stateValEscape:
-			val += string(char)
+			val += "\\" + string(char)
 			state = stateValString
 
 		// End of the string
@@ -266,7 +270,7 @@ func parseObject(json string, line int) (Object, int, error) {
 
 		// Escaping inside key
 		case stateKeyEscape:
-			key += string(char)
+			key += "\\" + string(char)
 			state = stateKey
 
 		// Waiting for colon
@@ -279,6 +283,11 @@ func parseObject(json string, line int) (Object, int, error) {
 			}
 			if char != ':' {
 				return nil, 0, fmt.Errorf("not a valid JSON - expecting ':', got '%s' on line %d", string(char), line)
+			}
+			var err error
+			key, err = strconv.Unquote(fmt.Sprintf(`"%s"`, key))
+			if err != nil {
+				return nil, 0, err
 			}
 			val = ""
 			state = stateVal
@@ -353,7 +362,11 @@ func parseObject(json string, line int) (Object, int, error) {
 				continue
 			}
 			if char == '"' {
-				object.Set(key, val)
+				str, err := strconv.Unquote(fmt.Sprintf(`"%s"`, val))
+				if err != nil {
+					return nil, 0, err
+				}
+				object.Set(key, str)
 				state = stateValAfterString
 				continue
 			}
@@ -361,7 +374,7 @@ func parseObject(json string, line int) (Object, int, error) {
 
 		// Escaping inside string
 		case stateValEscape:
-			val += string(char)
+			val += "\\" + string(char)
 			state = stateValString
 
 		// End of the string
