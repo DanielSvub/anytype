@@ -352,7 +352,8 @@ Returns:
 */
 func (ego *atFloat) serialize() string {
 	val := ego.getVal().(float64)
-	if val >= math.Pow10(6) || val <= math.Pow10(-6) {
+	abs := math.Abs(val)
+	if abs >= math.Pow10(6) || (abs > 0 && abs <= math.Pow10(-6)) {
 		return strconv.FormatFloat(val, 'e', -1, 64)
 	}
 	return strconv.FormatFloat(val, 'f', -1, 64)
