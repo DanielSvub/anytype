@@ -8,6 +8,7 @@ package anytype
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"math"
 	"math/bits"
 	"sort"
@@ -108,7 +109,7 @@ func NewListFrom(slice any) List {
 			ego.Add(item)
 		}
 	default:
-		panic("Unknown slice type.")
+		panic("unsupported slice type")
 	}
 	return ego
 }
@@ -118,7 +119,7 @@ Asserts that the list is initialized.
 */
 func (ego *list) assert() {
 	if ego == nil || ego.val == nil {
-		panic("List is not initialized.")
+		panic("list is not initialized")
 	}
 }
 
@@ -209,7 +210,7 @@ func (ego *list) Add(values ...any) List {
 func (ego *list) Insert(index int, value any) List {
 	ego.assert()
 	if index < 0 || index > ego.Count() {
-		panic("Index " + strconv.Itoa(index) + " out of range.")
+		panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Count()))
 	}
 	if index == ego.Count() {
 		return ego.ptr.Add(value)
@@ -222,7 +223,7 @@ func (ego *list) Insert(index int, value any) List {
 func (ego *list) Replace(index int, value any) List {
 	ego.assert()
 	if index < 0 || index > ego.Count() {
-		panic("Index " + strconv.Itoa(index) + " out of range.")
+		panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Count()))
 	}
 	ego.val[index] = parseVal(value)
 	return ego.ptr
@@ -236,7 +237,7 @@ func (ego *list) Delete(indexes ...int) List {
 	for i := len(indexes) - 1; i >= 0; i-- {
 		index := indexes[i]
 		if len(ego.val) <= index || index < 0 {
-			panic("Index " + strconv.Itoa(index) + " out of range.")
+			panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Count()))
 		}
 		ego.val = append(ego.val[:index], ego.val[index+1:]...)
 	}
@@ -256,7 +257,7 @@ func (ego *list) Clear() List {
 func (ego *list) Get(index int) any {
 	ego.assert()
 	if len(ego.val) <= index || index < 0 {
-		panic("Index " + strconv.Itoa(index) + " out of range.")
+		panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Count()))
 	}
 	obj := ego.val[index]
 	switch obj.(type) {
@@ -270,7 +271,7 @@ func (ego *list) Get(index int) any {
 func (ego *list) GetObject(index int) Object {
 	o, ok := ego.Get(index).(Object)
 	if !ok {
-		panic("Item is not an object.")
+		panic("item is not an object")
 	}
 	return o
 }
@@ -278,7 +279,7 @@ func (ego *list) GetObject(index int) Object {
 func (ego *list) GetList(index int) List {
 	o, ok := ego.Get(index).(List)
 	if !ok {
-		panic("Item is not a list.")
+		panic("item is not a list")
 	}
 	return o
 }
@@ -286,7 +287,7 @@ func (ego *list) GetList(index int) List {
 func (ego *list) GetString(index int) string {
 	o, ok := ego.Get(index).(string)
 	if !ok {
-		panic("Item is not a string.")
+		panic("item is not a string")
 	}
 	return o
 }
@@ -294,7 +295,7 @@ func (ego *list) GetString(index int) string {
 func (ego *list) GetBool(index int) bool {
 	o, ok := ego.Get(index).(bool)
 	if !ok {
-		panic("Item is not a bool.")
+		panic("item is not a bool")
 	}
 	return o
 }
@@ -302,7 +303,7 @@ func (ego *list) GetBool(index int) bool {
 func (ego *list) GetInt(index int) int {
 	o, ok := ego.Get(index).(int)
 	if !ok {
-		panic("Item is not an int.")
+		panic("item is not an int")
 	}
 	return o
 }
@@ -310,7 +311,7 @@ func (ego *list) GetInt(index int) int {
 func (ego *list) GetFloat(index int) float64 {
 	o, ok := ego.Get(index).(float64)
 	if !ok {
-		panic("Item is not a float.")
+		panic("item is not a float")
 	}
 	return o
 }
@@ -333,7 +334,7 @@ func (ego *list) TypeOf(index int) Type {
 	case *atNil:
 		return TypeNil
 	default:
-		panic("Unknown element type.")
+		panic("unknown element type")
 	}
 }
 
@@ -344,7 +345,7 @@ func (ego *list) String() string {
 
 func (ego *list) FormatString(indent int) string {
 	if indent < 0 || indent > 10 {
-		panic("Invalid indentation.")
+		panic("invalid indentation")
 	}
 	buffer := new(bytes.Buffer)
 	json.Indent(buffer, []byte(ego.String()), "", strings.Repeat(" ", indent))
@@ -363,7 +364,7 @@ func (ego *list) Slice() []any {
 func (ego *list) ObjectSlice() []Object {
 	ego.assert()
 	if !ego.AllObjects() {
-		panic("All elements have to be objects.")
+		panic("all elements have to be objects")
 	}
 	slice := make([]Object, 0)
 	for _, item := range ego.val {
@@ -375,7 +376,7 @@ func (ego *list) ObjectSlice() []Object {
 func (ego *list) ListSlice() []List {
 	ego.assert()
 	if !ego.AllLists() {
-		panic("All elements have to be lists.")
+		panic("all elements have to be lists")
 	}
 	slice := make([]List, 0)
 	for _, item := range ego.val {
@@ -387,7 +388,7 @@ func (ego *list) ListSlice() []List {
 func (ego *list) StringSlice() []string {
 	ego.assert()
 	if !ego.AllStrings() {
-		panic("All elements have to be strings.")
+		panic("all elements have to be strings")
 	}
 	slice := make([]string, 0)
 	for _, item := range ego.val {
@@ -399,7 +400,7 @@ func (ego *list) StringSlice() []string {
 func (ego *list) BoolSlice() []bool {
 	ego.assert()
 	if !ego.AllBools() {
-		panic("All elements have to be bools.")
+		panic("all elements have to be bools")
 	}
 	slice := make([]bool, 0)
 	for _, item := range ego.val {
@@ -411,7 +412,7 @@ func (ego *list) BoolSlice() []bool {
 func (ego *list) IntSlice() []int {
 	ego.assert()
 	if !ego.AllInts() {
-		panic("All elements have to be ints.")
+		panic("all elements have to be ints")
 	}
 	slice := make([]int, 0)
 	for _, item := range ego.val {
@@ -423,7 +424,7 @@ func (ego *list) IntSlice() []int {
 func (ego *list) FloatSlice() []float64 {
 	ego.assert()
 	if !ego.AllFloats() {
-		panic("All elements have to be floats.")
+		panic("all elements have to be floats")
 	}
 	slice := make([]float64, 0)
 	for _, item := range ego.val {
@@ -460,14 +461,17 @@ func (ego *list) Concat(another List) List {
 
 func (ego *list) SubList(start int, end int) List {
 	ego.assert()
+	if end > ego.Count() || end < -ego.Count() {
+		panic(fmt.Sprintf("ending index %d out of range with count %d", end, ego.Count()))
+	}
 	if end <= 0 {
 		end = ego.Count() + end
 	}
 	if start > end {
-		panic("Starting index higher than ending index.")
+		panic("starting index is higher than the ending index")
 	}
-	if len(ego.val) < end || start < 0 {
-		panic("Index out of range.")
+	if start < 0 {
+		panic("starting index is lower than zero")
 	}
 	list := &list{val: make([]field, end-start)}
 	list.Init(list)
@@ -525,7 +529,7 @@ func (ego *list) Sort() List {
 		sort.Float64s(slice)
 		ego.val = NewListFrom(slice).(*list).val
 	default:
-		panic("List has to be homogeneous with all its elements numeric or strings.")
+		panic("list has to be homogeneous with all elements numeric or strings")
 	}
 	return ego.ptr
 }
@@ -897,7 +901,7 @@ func (ego *list) FilterFloats(function func(float64) bool) List {
 
 func (ego *list) IntSum() int {
 	if !ego.AllInts() {
-		panic("All elements have to be ints.")
+		panic("all elements have to be ints")
 	}
 	var result int
 	for _, item := range ego.val {
@@ -908,7 +912,7 @@ func (ego *list) IntSum() int {
 
 func (ego *list) Sum() float64 {
 	if !ego.AllNumeric() {
-		panic("All elements have to be numeric.")
+		panic("all elements have to be numeric")
 	}
 	var result float64
 	for _, item := range ego.val {
@@ -925,7 +929,7 @@ func (ego *list) Sum() float64 {
 
 func (ego *list) IntProd() int {
 	if !ego.AllInts() {
-		panic("All elements have to be ints.")
+		panic("all elements have to be ints")
 	}
 	result := 1
 	for _, item := range ego.val {
@@ -936,7 +940,7 @@ func (ego *list) IntProd() int {
 
 func (ego *list) Prod() float64 {
 	if !ego.AllNumeric() {
-		panic("All elements have to be numeric.")
+		panic("all elements have to be numeric")
 	}
 	result := 1.0
 	for _, item := range ego.val {
@@ -964,7 +968,7 @@ func (ego *list) IntMin() int {
 			}
 		})
 	} else {
-		panic("All elements have to be ints.")
+		panic("all elements have to be ints")
 	}
 }
 
@@ -987,7 +991,7 @@ func (ego *list) Min() float64 {
 			}
 		}).(float64)
 	} else {
-		panic("All elements have to be numeric.")
+		panic("all elements have to be numeric")
 	}
 }
 
@@ -1001,7 +1005,7 @@ func (ego *list) IntMax() int {
 			}
 		})
 	} else {
-		panic("All elements have to be ints.")
+		panic("all elements have to be ints")
 	}
 }
 
@@ -1024,7 +1028,7 @@ func (ego *list) Max() float64 {
 			}
 		}).(float64)
 	} else {
-		panic("All elements have to be numeric.")
+		panic("all elements have to be numeric")
 	}
 }
 
@@ -1065,7 +1069,7 @@ func (ego *list) MapAsync(function func(int, any) any) List {
 func (ego *list) GetTF(tf string) any {
 	ego.assert()
 	if tf[0] != '#' || len(tf) < 2 {
-		panic("'" + tf + "' is not a valid tree form.")
+		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
 	}
 	tf = tf[1:]
 	dot := strings.Index(tf, ".")
@@ -1073,20 +1077,20 @@ func (ego *list) GetTF(tf string) any {
 	if dot > 0 && (hash < 0 || dot < hash) {
 		integer, err := strconv.ParseInt(tf[:dot], 0, bits.UintSize)
 		if err != nil {
-			panic("'" + tf[:dot] + "' cannot be converted to int.")
+			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:dot]))
 		}
 		return ego.ptr.GetObject(int(integer)).GetTF(tf[dot:])
 	}
 	if hash > 0 && (dot < 0 || hash < dot) {
 		integer, err := strconv.ParseInt(tf[:hash], 0, bits.UintSize)
 		if err != nil {
-			panic("'" + tf[:hash] + "' cannot be converted to int.")
+			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:hash]))
 		}
 		return ego.ptr.GetList(int(integer)).GetTF(tf[hash:])
 	}
 	integer, err := strconv.ParseInt(tf, 0, bits.UintSize)
 	if err != nil {
-		panic("'" + tf + "' cannot be converted to int.")
+		panic(fmt.Sprintf("'%s' cannot be converted to int", tf))
 	}
 	return ego.ptr.Get(int(integer))
 }
@@ -1094,7 +1098,7 @@ func (ego *list) GetTF(tf string) any {
 func (ego *list) SetTF(tf string, value any) List {
 	ego.assert()
 	if tf[0] != '#' || len(tf) < 2 {
-		panic("'" + tf + "' is not a valid tree form.")
+		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
 	}
 	tf = tf[1:]
 	dot := strings.Index(tf, ".")
@@ -1102,7 +1106,7 @@ func (ego *list) SetTF(tf string, value any) List {
 	if dot > 0 && (hash < 0 || dot < hash) {
 		integer, err := strconv.ParseInt(tf[:dot], 0, bits.UintSize)
 		if err != nil {
-			panic("'" + tf[:dot] + "' cannot be converted to int.")
+			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:dot]))
 		}
 		var object Object
 		if int(integer) < ego.Count() {
@@ -1117,7 +1121,7 @@ func (ego *list) SetTF(tf string, value any) List {
 	if hash > 0 && (dot < 0 || hash < dot) {
 		integer, err := strconv.ParseInt(tf[:hash], 0, bits.UintSize)
 		if err != nil {
-			panic("'" + tf[:hash] + "' cannot be converted to int.")
+			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:hash]))
 		}
 		var list List
 		if int(integer) < ego.Count() {
@@ -1131,7 +1135,7 @@ func (ego *list) SetTF(tf string, value any) List {
 	}
 	integer, err := strconv.ParseInt(tf, 0, bits.UintSize)
 	if err != nil {
-		panic("'" + tf + "' cannot be converted to int.")
+		panic(fmt.Sprintf("'%s' cannot be converted to int", tf))
 	}
 	return ego.ptr.Insert(int(integer), value)
 }

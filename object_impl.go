@@ -85,7 +85,7 @@ func NewObjectFrom(dict any) Object {
 			object.Set(key, value)
 		}
 	default:
-		panic("Unknown map type.")
+		panic("unsupported map type")
 	}
 	return object
 }
@@ -95,7 +95,7 @@ Asserts that the object is initialized.
 */
 func (ego *object) assert() {
 	if ego == nil || ego.val == nil {
-		panic("Object is not initialized.")
+		panic("object is not initialized")
 	}
 }
 
@@ -180,12 +180,12 @@ func (ego *object) Set(values ...any) Object {
 	ego.assert()
 	length := len(values)
 	if length%2 != 0 {
-		panic("Object fields have to be set as key-value pairs.")
+		panic("object fields have to be set as key-value pairs")
 	}
 	for i := 0; i < length; i += 2 {
 		name, ok := values[i].(string)
 		if !ok || name == "" {
-			panic("Object key has to be non-empty string.")
+			panic("object key has to be a non-empty string")
 		}
 		ego.val[name] = parseVal(values[i+1])
 	}
@@ -196,7 +196,7 @@ func (ego *object) Unset(keys ...string) Object {
 	ego.assert()
 	for _, key := range keys {
 		if ego.val[key] == nil {
-			panic("Object does not have a field '" + key + "'.")
+			panic(fmt.Sprintf("object does not have a field '%s'", key))
 		}
 		delete(ego.val, key)
 	}
@@ -212,7 +212,7 @@ func (ego *object) Clear() Object {
 func (ego *object) Get(key string) any {
 	ego.assert()
 	if ego.val[key] == nil {
-		panic("Object does not have a field '" + key + "'.")
+		panic(fmt.Sprintf("object does not have a field '%s'", key))
 	}
 	obj := ego.val[key]
 	switch obj.(type) {
@@ -226,7 +226,7 @@ func (ego *object) Get(key string) any {
 func (ego *object) GetObject(key string) Object {
 	o, ok := ego.Get(key).(*object)
 	if !ok {
-		panic("Item is not an object.")
+		panic("field is not an object")
 	}
 	return o
 }
@@ -234,7 +234,7 @@ func (ego *object) GetObject(key string) Object {
 func (ego *object) GetList(key string) List {
 	o, ok := ego.Get(key).(*list)
 	if !ok {
-		panic("Field is not a list.")
+		panic("field is not a list")
 	}
 	return o
 }
@@ -242,7 +242,7 @@ func (ego *object) GetList(key string) List {
 func (ego *object) GetString(key string) string {
 	o, ok := ego.Get(key).(string)
 	if !ok {
-		panic("Field is not a string.")
+		panic("field is not a string")
 	}
 	return o
 }
@@ -250,7 +250,7 @@ func (ego *object) GetString(key string) string {
 func (ego *object) GetBool(key string) bool {
 	o, ok := ego.Get(key).(bool)
 	if !ok {
-		panic("Field is not a bool.")
+		panic("field is not a bool")
 	}
 	return o
 }
@@ -258,7 +258,7 @@ func (ego *object) GetBool(key string) bool {
 func (ego *object) GetInt(key string) int {
 	o, ok := ego.Get(key).(int)
 	if !ok {
-		panic("Field is not an int.")
+		panic("field is not an int")
 	}
 	return o
 }
@@ -266,7 +266,7 @@ func (ego *object) GetInt(key string) int {
 func (ego *object) GetFloat(key string) float64 {
 	o, ok := ego.Get(key).(float64)
 	if !ok {
-		panic("Field is not a float.")
+		panic("field is not a float")
 	}
 	return o
 }
@@ -289,7 +289,7 @@ func (ego *object) TypeOf(key string) Type {
 	case *atNil:
 		return TypeNil
 	default:
-		panic("Unknown field type.")
+		panic("unknown field type")
 	}
 }
 
@@ -300,7 +300,7 @@ func (ego *object) String() string {
 
 func (ego *object) FormatString(indent int) string {
 	if indent < 0 || indent > 10 {
-		panic("Invalid indentation.")
+		panic("invalid indentation")
 	}
 	buffer := new(bytes.Buffer)
 	json.Indent(buffer, []byte(ego.String()), "", strings.Repeat(" ", indent))
@@ -606,7 +606,7 @@ func (ego *object) MapAsync(function func(string, any) any) Object {
 func (ego *object) GetTF(tf string) any {
 	ego.assert()
 	if tf[0] != '.' || len(tf) < 2 {
-		panic("'" + tf + "' is not a valid tree form.")
+		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
 	}
 	tf = tf[1:]
 	dot := strings.Index(tf, ".")
@@ -623,7 +623,7 @@ func (ego *object) GetTF(tf string) any {
 func (ego *object) SetTF(tf string, value any) Object {
 	ego.assert()
 	if tf[0] != '.' || len(tf) < 2 {
-		panic("'" + tf + "' is not a valid tree form.")
+		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
 	}
 	tf = tf[1:]
 	dot := strings.Index(tf, ".")
