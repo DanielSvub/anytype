@@ -21,7 +21,7 @@ Implements:
   - field,
   - Object.
 */
-type MapObject struct {
+type object struct {
 	val map[string]field
 	ptr Object
 }
@@ -37,7 +37,7 @@ Returns:
   - pointer to the created object.
 */
 func NewObject(vals ...any) Object {
-	ego := &MapObject{val: make(map[string]field)}
+	ego := &object{val: make(map[string]field)}
 	ego.ptr = ego
 	ego.Set(vals...)
 	return ego
@@ -93,7 +93,7 @@ func NewObjectFrom(dict any) Object {
 /*
 Asserts that the object is initialized.
 */
-func (ego *MapObject) assert() {
+func (ego *object) assert() {
 	if ego == nil || ego.val == nil {
 		panic("Object is not initialized.")
 	}
@@ -106,7 +106,7 @@ Acquires the value of the field, in this case a reference to the whole struct (O
 Returns:
   - value of the field.
 */
-func (ego *MapObject) getVal() any {
+func (ego *object) getVal() any {
 	return ego.ptr
 }
 
@@ -118,7 +118,7 @@ Can be called recursively.
 Returns:
   - deep copy of the field.
 */
-func (ego *MapObject) copy() any {
+func (ego *object) copy() any {
 	obj := NewObject()
 	for key, value := range ego.val {
 		obj.Set(key, value.copy())
@@ -134,7 +134,7 @@ Can be called recursively.
 Returns:
   - string representing serialized field.
 */
-func (ego *MapObject) serialize() string {
+func (ego *object) serialize() string {
 	result := "{"
 	i := 0
 	for field, value := range ego.val {
@@ -155,8 +155,8 @@ Can be called recursively.
 Returns:
   - true if the fields are equal, false otherwise.
 */
-func (ego *MapObject) isEqual(another any) bool {
-	obj, ok := another.(*MapObject)
+func (ego *object) isEqual(another any) bool {
+	obj, ok := another.(*object)
 	if !ok || ego.Count() != obj.Count() {
 		return false
 	}
@@ -168,11 +168,15 @@ func (ego *MapObject) isEqual(another any) bool {
 	return true
 }
 
-func (ego *MapObject) Init(ptr Object) {
+func (ego *object) Init(ptr Object) {
 	ego.ptr = ptr
 }
 
-func (ego *MapObject) Set(values ...any) Object {
+func (ego *object) Ego() Object {
+	return ego.ptr
+}
+
+func (ego *object) Set(values ...any) Object {
 	ego.assert()
 	length := len(values)
 	if length%2 != 0 {
@@ -188,7 +192,7 @@ func (ego *MapObject) Set(values ...any) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) Unset(keys ...string) Object {
+func (ego *object) Unset(keys ...string) Object {
 	ego.assert()
 	for _, key := range keys {
 		if ego.val[key] == nil {
@@ -199,13 +203,13 @@ func (ego *MapObject) Unset(keys ...string) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) Clear() Object {
+func (ego *object) Clear() Object {
 	ego.assert()
 	ego.val = make(map[string]field, 0)
 	return ego.ptr
 }
 
-func (ego *MapObject) Get(key string) any {
+func (ego *object) Get(key string) any {
 	ego.assert()
 	if ego.val[key] == nil {
 		panic("Object does not have a field '" + key + "'.")
@@ -219,23 +223,23 @@ func (ego *MapObject) Get(key string) any {
 	}
 }
 
-func (ego *MapObject) GetObject(key string) Object {
-	o, ok := ego.Get(key).(*MapObject)
+func (ego *object) GetObject(key string) Object {
+	o, ok := ego.Get(key).(*object)
 	if !ok {
 		panic("Item is not an object.")
 	}
 	return o
 }
 
-func (ego *MapObject) GetList(key string) List {
-	o, ok := ego.Get(key).(*SliceList)
+func (ego *object) GetList(key string) List {
+	o, ok := ego.Get(key).(*list)
 	if !ok {
 		panic("Field is not a list.")
 	}
 	return o
 }
 
-func (ego *MapObject) GetString(key string) string {
+func (ego *object) GetString(key string) string {
 	o, ok := ego.Get(key).(string)
 	if !ok {
 		panic("Field is not a string.")
@@ -243,7 +247,7 @@ func (ego *MapObject) GetString(key string) string {
 	return o
 }
 
-func (ego *MapObject) GetBool(key string) bool {
+func (ego *object) GetBool(key string) bool {
 	o, ok := ego.Get(key).(bool)
 	if !ok {
 		panic("Field is not a bool.")
@@ -251,7 +255,7 @@ func (ego *MapObject) GetBool(key string) bool {
 	return o
 }
 
-func (ego *MapObject) GetInt(key string) int {
+func (ego *object) GetInt(key string) int {
 	o, ok := ego.Get(key).(int)
 	if !ok {
 		panic("Field is not an int.")
@@ -259,7 +263,7 @@ func (ego *MapObject) GetInt(key string) int {
 	return o
 }
 
-func (ego *MapObject) GetFloat(key string) float64 {
+func (ego *object) GetFloat(key string) float64 {
 	o, ok := ego.Get(key).(float64)
 	if !ok {
 		panic("Field is not a float.")
@@ -267,7 +271,7 @@ func (ego *MapObject) GetFloat(key string) float64 {
 	return o
 }
 
-func (ego *MapObject) TypeOf(key string) Type {
+func (ego *object) TypeOf(key string) Type {
 	ego.assert()
 	switch ego.val[key].(type) {
 	case *atString:
@@ -278,9 +282,9 @@ func (ego *MapObject) TypeOf(key string) Type {
 		return TypeBool
 	case *atFloat:
 		return TypeFloat
-	case *MapObject:
+	case *object:
 		return TypeObject
-	case *SliceList:
+	case *list:
 		return TypeList
 	case *atNil:
 		return TypeNil
@@ -289,12 +293,12 @@ func (ego *MapObject) TypeOf(key string) Type {
 	}
 }
 
-func (ego *MapObject) String() string {
+func (ego *object) String() string {
 	ego.assert()
 	return ego.ptr.serialize()
 }
 
-func (ego *MapObject) FormatString(indent int) string {
+func (ego *object) FormatString(indent int) string {
 	if indent < 0 || indent > 10 {
 		panic("Invalid indentation.")
 	}
@@ -303,7 +307,7 @@ func (ego *MapObject) FormatString(indent int) string {
 	return buffer.String()
 }
 
-func (ego *MapObject) Dict() map[string]any {
+func (ego *object) Dict() map[string]any {
 	ego.assert()
 	dict := make(map[string]any, 0)
 	for key, value := range ego.val {
@@ -312,7 +316,7 @@ func (ego *MapObject) Dict() map[string]any {
 	return dict
 }
 
-func (ego *MapObject) Keys() List {
+func (ego *object) Keys() List {
 	keys := NewList()
 	for key := range ego.val {
 		keys.Add(key)
@@ -320,7 +324,7 @@ func (ego *MapObject) Keys() List {
 	return keys
 }
 
-func (ego *MapObject) Values() List {
+func (ego *object) Values() List {
 	values := NewList()
 	for _, value := range ego.val {
 		values.Add(value.getVal())
@@ -328,26 +332,26 @@ func (ego *MapObject) Values() List {
 	return values
 }
 
-func (ego *MapObject) Clone() Object {
+func (ego *object) Clone() Object {
 	ego.assert()
-	return ego.ptr.copy().(*MapObject)
+	return ego.ptr.copy().(*object)
 }
 
-func (ego *MapObject) Count() int {
+func (ego *object) Count() int {
 	ego.assert()
 	return len(ego.val)
 }
 
-func (ego *MapObject) Empty() bool {
+func (ego *object) Empty() bool {
 	return ego.ptr.Count() == 0
 }
 
-func (ego *MapObject) Equals(another Object) bool {
+func (ego *object) Equals(another Object) bool {
 	ego.assert()
 	return ego.ptr.isEqual(another)
 }
 
-func (ego *MapObject) Merge(another Object) Object {
+func (ego *object) Merge(another Object) Object {
 	ego.assert()
 	result := ego.Clone()
 	another.ForEach(func(key string, val any) {
@@ -356,7 +360,7 @@ func (ego *MapObject) Merge(another Object) Object {
 	return result
 }
 
-func (ego *MapObject) Pluck(keys ...string) Object {
+func (ego *object) Pluck(keys ...string) Object {
 	ego.assert()
 	result := NewObject()
 	for _, key := range keys {
@@ -365,7 +369,7 @@ func (ego *MapObject) Pluck(keys ...string) Object {
 	return result
 }
 
-func (ego *MapObject) Contains(value any) bool {
+func (ego *object) Contains(value any) bool {
 	ego.assert()
 	for _, item := range ego.val {
 		switch item.(type) {
@@ -382,7 +386,7 @@ func (ego *MapObject) Contains(value any) bool {
 	return false
 }
 
-func (ego *MapObject) KeyOf(value any) string {
+func (ego *object) KeyOf(value any) string {
 	ego.assert()
 	for key, item := range ego.val {
 		switch item.(type) {
@@ -399,13 +403,13 @@ func (ego *MapObject) KeyOf(value any) string {
 	return ""
 }
 
-func (ego *MapObject) KeyExists(key string) bool {
+func (ego *object) KeyExists(key string) bool {
 	ego.assert()
 	_, ok := ego.val[key]
 	return ok
 }
 
-func (ego *MapObject) ForEach(function func(string, any)) Object {
+func (ego *object) ForEach(function func(string, any)) Object {
 	ego.assert()
 	for key, item := range ego.val {
 		function(key, item.getVal())
@@ -413,7 +417,7 @@ func (ego *MapObject) ForEach(function func(string, any)) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) ForEachValue(function func(any)) Object {
+func (ego *object) ForEachValue(function func(any)) Object {
 	ego.assert()
 	for _, item := range ego.val {
 		function(item.getVal())
@@ -421,7 +425,7 @@ func (ego *MapObject) ForEachValue(function func(any)) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) ForEachObject(function func(Object)) Object {
+func (ego *object) ForEachObject(function func(Object)) Object {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(Object)
@@ -432,7 +436,7 @@ func (ego *MapObject) ForEachObject(function func(Object)) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) ForEachList(function func(List)) Object {
+func (ego *object) ForEachList(function func(List)) Object {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(List)
@@ -443,7 +447,7 @@ func (ego *MapObject) ForEachList(function func(List)) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) ForEachString(function func(string)) Object {
+func (ego *object) ForEachString(function func(string)) Object {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(string)
@@ -454,7 +458,7 @@ func (ego *MapObject) ForEachString(function func(string)) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) ForEachBool(function func(bool)) Object {
+func (ego *object) ForEachBool(function func(bool)) Object {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(bool)
@@ -465,7 +469,7 @@ func (ego *MapObject) ForEachBool(function func(bool)) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) ForEachInt(function func(int)) Object {
+func (ego *object) ForEachInt(function func(int)) Object {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(int)
@@ -476,7 +480,7 @@ func (ego *MapObject) ForEachInt(function func(int)) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) ForEachFloat(function func(float64)) Object {
+func (ego *object) ForEachFloat(function func(float64)) Object {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(float64)
@@ -487,7 +491,7 @@ func (ego *MapObject) ForEachFloat(function func(float64)) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) Map(function func(string, any) any) Object {
+func (ego *object) Map(function func(string, any) any) Object {
 	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
@@ -496,7 +500,7 @@ func (ego *MapObject) Map(function func(string, any) any) Object {
 	return result
 }
 
-func (ego *MapObject) MapValues(function func(any) any) Object {
+func (ego *object) MapValues(function func(any) any) Object {
 	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
@@ -505,7 +509,7 @@ func (ego *MapObject) MapValues(function func(any) any) Object {
 	return result
 }
 
-func (ego *MapObject) MapObjects(function func(Object) any) Object {
+func (ego *object) MapObjects(function func(Object) any) Object {
 	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
@@ -517,7 +521,7 @@ func (ego *MapObject) MapObjects(function func(Object) any) Object {
 	return result
 }
 
-func (ego *MapObject) MapLists(function func(List) any) Object {
+func (ego *object) MapLists(function func(List) any) Object {
 	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
@@ -529,7 +533,7 @@ func (ego *MapObject) MapLists(function func(List) any) Object {
 	return result
 }
 
-func (ego *MapObject) MapStrings(function func(string) any) Object {
+func (ego *object) MapStrings(function func(string) any) Object {
 	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
@@ -541,7 +545,7 @@ func (ego *MapObject) MapStrings(function func(string) any) Object {
 	return result
 }
 
-func (ego *MapObject) MapInts(function func(int) any) Object {
+func (ego *object) MapInts(function func(int) any) Object {
 	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
@@ -553,7 +557,7 @@ func (ego *MapObject) MapInts(function func(int) any) Object {
 	return result
 }
 
-func (ego *MapObject) MapFloats(function func(float64) any) Object {
+func (ego *object) MapFloats(function func(float64) any) Object {
 	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
@@ -565,7 +569,7 @@ func (ego *MapObject) MapFloats(function func(float64) any) Object {
 	return result
 }
 
-func (ego *MapObject) ForEachAsync(function func(string, any)) Object {
+func (ego *object) ForEachAsync(function func(string, any)) Object {
 	ego.assert()
 	var wg sync.WaitGroup
 	step := func(group *sync.WaitGroup, k string, x any) {
@@ -580,7 +584,7 @@ func (ego *MapObject) ForEachAsync(function func(string, any)) Object {
 	return ego.ptr
 }
 
-func (ego *MapObject) MapAsync(function func(string, any) any) Object {
+func (ego *object) MapAsync(function func(string, any) any) Object {
 	ego.assert()
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
@@ -599,7 +603,7 @@ func (ego *MapObject) MapAsync(function func(string, any) any) Object {
 	return result
 }
 
-func (ego *MapObject) GetTF(tf string) any {
+func (ego *object) GetTF(tf string) any {
 	ego.assert()
 	if tf[0] != '.' || len(tf) < 2 {
 		panic("'" + tf + "' is not a valid tree form.")
@@ -616,7 +620,7 @@ func (ego *MapObject) GetTF(tf string) any {
 	return ego.ptr.Get(tf)
 }
 
-func (ego *MapObject) SetTF(tf string, value any) Object {
+func (ego *object) SetTF(tf string, value any) Object {
 	ego.assert()
 	if tf[0] != '.' || len(tf) < 2 {
 		panic("'" + tf + "' is not a valid tree form.")

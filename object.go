@@ -23,6 +23,14 @@ type Object interface {
 	Init(ptr Object)
 
 	/*
+		Acquires the ego pointer previously set by Init.
+
+		Returns:
+		  - ego pointer.
+	*/
+	Ego() Object
+
+	/*
 		Sets a values of the fields.
 		If the key already exists, the value is overwritten, if not, new field is created.
 		If one key is given multiple times, the value is set to the last one.
@@ -261,7 +269,7 @@ type Object interface {
 		Returns:
 		  - true if the object contains the value, false otherwise.
 	*/
-	Contains(elem any) bool
+	Contains(value any) bool
 
 	/*
 		Gives a key containing a given value.
@@ -273,7 +281,7 @@ type Object interface {
 		Returns:
 		  - key for the value (empty string if the object does not contain the value).
 	*/
-	KeyOf(elem any) string
+	KeyOf(value any) string
 
 	/*
 		Checks if a given key exists within the object.

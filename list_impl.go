@@ -23,7 +23,7 @@ Implements:
   - field,
   - List.
 */
-type SliceList struct {
+type list struct {
 	val []field
 	ptr List
 }
@@ -39,7 +39,7 @@ Returns:
   - pointer to the created list.
 */
 func NewList(values ...any) List {
-	ego := &SliceList{val: make([]field, 0)}
+	ego := &list{val: make([]field, 0)}
 	ego.ptr = ego
 	ego.Add(values...)
 	return ego
@@ -57,7 +57,7 @@ Returns:
   - pointer to the created list.
 */
 func NewListOf(value any, count int) List {
-	ego := &SliceList{val: make([]field, count)}
+	ego := &list{val: make([]field, count)}
 	ego.ptr = ego
 	elem := parseVal(value)
 	for i := 0; i < ego.Count(); i++ {
@@ -77,46 +77,46 @@ Returns:
   - created list.
 */
 func NewListFrom(slice any) List {
-	list := NewList()
+	ego := NewList()
 	switch s := slice.(type) {
 	case []any:
 		for _, item := range s {
-			list.Add(item)
+			ego.Add(item)
 		}
 	case []Object:
 		for _, item := range s {
-			list.Add(item)
+			ego.Add(item)
 		}
 	case []List:
 		for _, item := range s {
-			list.Add(item)
+			ego.Add(item)
 		}
 	case []string:
 		for _, item := range s {
-			list.Add(item)
+			ego.Add(item)
 		}
 	case []bool:
 		for _, item := range s {
-			list.Add(item)
+			ego.Add(item)
 		}
 	case []int:
 		for _, item := range s {
-			list.Add(item)
+			ego.Add(item)
 		}
 	case []float64:
 		for _, item := range s {
-			list.Add(item)
+			ego.Add(item)
 		}
 	default:
 		panic("Unknown slice type.")
 	}
-	return list
+	return ego
 }
 
 /*
 Asserts that the list is initialized.
 */
-func (ego *SliceList) assert() {
+func (ego *list) assert() {
 	if ego == nil || ego.val == nil {
 		panic("List is not initialized.")
 	}
@@ -129,7 +129,7 @@ Acquires the value of the field, in this case a reference to the whole struct (L
 Returns:
   - value of the field.
 */
-func (ego *SliceList) getVal() any {
+func (ego *list) getVal() any {
 	return ego.ptr
 }
 
@@ -141,7 +141,7 @@ Can be called recursively.
 Returns:
   - deep copy of the field.
 */
-func (ego *SliceList) copy() any {
+func (ego *list) copy() any {
 	list := NewList()
 	for _, value := range ego.val {
 		list.Add(value.copy())
@@ -157,7 +157,7 @@ Can be called recursively.
 Returns:
   - string representing serialized field.
 */
-func (ego *SliceList) serialize() string {
+func (ego *list) serialize() string {
 	result := "["
 	for i, value := range ego.val {
 		result += value.serialize()
@@ -177,24 +177,28 @@ Can be called recursively.
 Returns:
   - true if the fields are equal, false otherwise.
 */
-func (ego *SliceList) isEqual(another any) bool {
-	list, ok := another.(List)
+func (ego *list) isEqual(another any) bool {
+	list, ok := another.(*list)
 	if !ok || ego.Count() != list.Count() {
 		return false
 	}
 	for i := range ego.val {
-		if !ego.val[i].isEqual(list.getVal().(*SliceList).val[i]) {
+		if !ego.val[i].isEqual(list.val[i]) {
 			return false
 		}
 	}
 	return true
 }
 
-func (ego *SliceList) Init(ptr List) {
+func (ego *list) Init(ptr List) {
 	ego.ptr = ptr
 }
 
-func (ego *SliceList) Add(values ...any) List {
+func (ego *list) Ego() List {
+	return ego.ptr
+}
+
+func (ego *list) Add(values ...any) List {
 	ego.assert()
 	for _, val := range values {
 		ego.val = append(ego.val, parseVal(val))
@@ -202,7 +206,7 @@ func (ego *SliceList) Add(values ...any) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) Insert(index int, value any) List {
+func (ego *list) Insert(index int, value any) List {
 	ego.assert()
 	if index < 0 || index > ego.Count() {
 		panic("Index " + strconv.Itoa(index) + " out of range.")
@@ -215,7 +219,7 @@ func (ego *SliceList) Insert(index int, value any) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) Replace(index int, value any) List {
+func (ego *list) Replace(index int, value any) List {
 	ego.assert()
 	if index < 0 || index > ego.Count() {
 		panic("Index " + strconv.Itoa(index) + " out of range.")
@@ -224,7 +228,7 @@ func (ego *SliceList) Replace(index int, value any) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) Delete(indexes ...int) List {
+func (ego *list) Delete(indexes ...int) List {
 	ego.assert()
 	if len(indexes) > 1 {
 		sort.Ints(indexes)
@@ -239,17 +243,17 @@ func (ego *SliceList) Delete(indexes ...int) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) Pop() List {
+func (ego *list) Pop() List {
 	return ego.ptr.Delete(ego.Count() - 1)
 }
 
-func (ego *SliceList) Clear() List {
+func (ego *list) Clear() List {
 	ego.assert()
 	ego.val = make([]field, 0)
 	return ego.ptr
 }
 
-func (ego *SliceList) Get(index int) any {
+func (ego *list) Get(index int) any {
 	ego.assert()
 	if len(ego.val) <= index || index < 0 {
 		panic("Index " + strconv.Itoa(index) + " out of range.")
@@ -263,7 +267,7 @@ func (ego *SliceList) Get(index int) any {
 	}
 }
 
-func (ego *SliceList) GetObject(index int) Object {
+func (ego *list) GetObject(index int) Object {
 	o, ok := ego.Get(index).(Object)
 	if !ok {
 		panic("Item is not an object.")
@@ -271,7 +275,7 @@ func (ego *SliceList) GetObject(index int) Object {
 	return o
 }
 
-func (ego *SliceList) GetList(index int) List {
+func (ego *list) GetList(index int) List {
 	o, ok := ego.Get(index).(List)
 	if !ok {
 		panic("Item is not a list.")
@@ -279,7 +283,7 @@ func (ego *SliceList) GetList(index int) List {
 	return o
 }
 
-func (ego *SliceList) GetString(index int) string {
+func (ego *list) GetString(index int) string {
 	o, ok := ego.Get(index).(string)
 	if !ok {
 		panic("Item is not a string.")
@@ -287,7 +291,7 @@ func (ego *SliceList) GetString(index int) string {
 	return o
 }
 
-func (ego *SliceList) GetBool(index int) bool {
+func (ego *list) GetBool(index int) bool {
 	o, ok := ego.Get(index).(bool)
 	if !ok {
 		panic("Item is not a bool.")
@@ -295,7 +299,7 @@ func (ego *SliceList) GetBool(index int) bool {
 	return o
 }
 
-func (ego *SliceList) GetInt(index int) int {
+func (ego *list) GetInt(index int) int {
 	o, ok := ego.Get(index).(int)
 	if !ok {
 		panic("Item is not an int.")
@@ -303,7 +307,7 @@ func (ego *SliceList) GetInt(index int) int {
 	return o
 }
 
-func (ego *SliceList) GetFloat(index int) float64 {
+func (ego *list) GetFloat(index int) float64 {
 	o, ok := ego.Get(index).(float64)
 	if !ok {
 		panic("Item is not a float.")
@@ -311,7 +315,7 @@ func (ego *SliceList) GetFloat(index int) float64 {
 	return o
 }
 
-func (ego *SliceList) TypeOf(index int) Type {
+func (ego *list) TypeOf(index int) Type {
 	ego.assert()
 	switch ego.val[index].(type) {
 	case *atString:
@@ -333,12 +337,12 @@ func (ego *SliceList) TypeOf(index int) Type {
 	}
 }
 
-func (ego *SliceList) String() string {
+func (ego *list) String() string {
 	ego.assert()
 	return ego.ptr.serialize()
 }
 
-func (ego *SliceList) FormatString(indent int) string {
+func (ego *list) FormatString(indent int) string {
 	if indent < 0 || indent > 10 {
 		panic("Invalid indentation.")
 	}
@@ -347,7 +351,7 @@ func (ego *SliceList) FormatString(indent int) string {
 	return buffer.String()
 }
 
-func (ego *SliceList) Slice() []any {
+func (ego *list) Slice() []any {
 	ego.assert()
 	slice := make([]any, 0)
 	for _, item := range ego.val {
@@ -356,7 +360,7 @@ func (ego *SliceList) Slice() []any {
 	return slice
 }
 
-func (ego *SliceList) ObjectSlice() []Object {
+func (ego *list) ObjectSlice() []Object {
 	ego.assert()
 	if !ego.AllObjects() {
 		panic("All elements have to be objects.")
@@ -368,7 +372,7 @@ func (ego *SliceList) ObjectSlice() []Object {
 	return slice
 }
 
-func (ego *SliceList) ListSlice() []List {
+func (ego *list) ListSlice() []List {
 	ego.assert()
 	if !ego.AllLists() {
 		panic("All elements have to be lists.")
@@ -380,7 +384,7 @@ func (ego *SliceList) ListSlice() []List {
 	return slice
 }
 
-func (ego *SliceList) StringSlice() []string {
+func (ego *list) StringSlice() []string {
 	ego.assert()
 	if !ego.AllStrings() {
 		panic("All elements have to be strings.")
@@ -392,7 +396,7 @@ func (ego *SliceList) StringSlice() []string {
 	return slice
 }
 
-func (ego *SliceList) BoolSlice() []bool {
+func (ego *list) BoolSlice() []bool {
 	ego.assert()
 	if !ego.AllBools() {
 		panic("All elements have to be bools.")
@@ -404,7 +408,7 @@ func (ego *SliceList) BoolSlice() []bool {
 	return slice
 }
 
-func (ego *SliceList) IntSlice() []int {
+func (ego *list) IntSlice() []int {
 	ego.assert()
 	if !ego.AllInts() {
 		panic("All elements have to be ints.")
@@ -416,7 +420,7 @@ func (ego *SliceList) IntSlice() []int {
 	return slice
 }
 
-func (ego *SliceList) FloatSlice() []float64 {
+func (ego *list) FloatSlice() []float64 {
 	ego.assert()
 	if !ego.AllFloats() {
 		panic("All elements have to be floats.")
@@ -428,33 +432,33 @@ func (ego *SliceList) FloatSlice() []float64 {
 	return slice
 }
 
-func (ego *SliceList) Clone() List {
+func (ego *list) Clone() List {
 	ego.assert()
-	return ego.ptr.copy().(*SliceList)
+	return ego.ptr.copy().(*list)
 }
 
-func (ego *SliceList) Count() int {
+func (ego *list) Count() int {
 	ego.assert()
 	return len(ego.val)
 }
 
-func (ego *SliceList) Empty() bool {
+func (ego *list) Empty() bool {
 	return ego.ptr.Count() == 0
 }
 
-func (ego *SliceList) Equals(another List) bool {
+func (ego *list) Equals(another List) bool {
 	ego.assert()
 	return ego.ptr.isEqual(another)
 }
 
-func (ego *SliceList) Concat(another List) List {
+func (ego *list) Concat(another List) List {
 	ego.assert()
-	newList := &SliceList{val: append(ego.val, another.getVal().(*SliceList).val...)}
+	newList := &list{val: append(ego.val, another.getVal().(*list).val...)}
 	newList.Init(newList)
 	return newList
 }
 
-func (ego *SliceList) SubList(start int, end int) List {
+func (ego *list) SubList(start int, end int) List {
 	ego.assert()
 	if end <= 0 {
 		end = ego.Count() + end
@@ -465,13 +469,13 @@ func (ego *SliceList) SubList(start int, end int) List {
 	if len(ego.val) < end || start < 0 {
 		panic("Index out of range.")
 	}
-	list := &SliceList{val: make([]field, end-start)}
+	list := &list{val: make([]field, end-start)}
 	list.Init(list)
 	copy(list.val, ego.val[start:end])
 	return list
 }
 
-func (ego *SliceList) Contains(elem any) bool {
+func (ego *list) Contains(elem any) bool {
 	ego.assert()
 	for _, item := range ego.val {
 		switch item.(type) {
@@ -488,7 +492,7 @@ func (ego *SliceList) Contains(elem any) bool {
 	return false
 }
 
-func (ego *SliceList) IndexOf(elem any) int {
+func (ego *list) IndexOf(elem any) int {
 	ego.assert()
 	for i, item := range ego.val {
 		switch item.(type) {
@@ -505,28 +509,28 @@ func (ego *SliceList) IndexOf(elem any) int {
 	return -1
 }
 
-func (ego *SliceList) Sort() List {
+func (ego *list) Sort() List {
 	ego.assert()
 	switch ego.val[0].(type) {
 	case *atString:
 		slice := ego.StringSlice()
 		sort.Strings(slice)
-		ego.val = NewListFrom(slice).(*SliceList).val
+		ego.val = NewListFrom(slice).(*list).val
 	case *atInt:
 		slice := ego.IntSlice()
 		sort.Ints(slice)
-		ego.val = NewListFrom(slice).(*SliceList).val
+		ego.val = NewListFrom(slice).(*list).val
 	case *atFloat:
 		slice := ego.FloatSlice()
 		sort.Float64s(slice)
-		ego.val = NewListFrom(slice).(*SliceList).val
+		ego.val = NewListFrom(slice).(*list).val
 	default:
 		panic("List has to be homogeneous with all its elements numeric or strings.")
 	}
 	return ego.ptr
 }
 
-func (ego *SliceList) Reverse() List {
+func (ego *list) Reverse() List {
 	ego.assert()
 	for i := ego.Count()/2 - 1; i >= 0; i-- {
 		opp := ego.Count() - 1 - i
@@ -535,7 +539,7 @@ func (ego *SliceList) Reverse() List {
 	return ego.ptr
 }
 
-func (ego *SliceList) AllObjects() bool {
+func (ego *list) AllObjects() bool {
 	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(Object)
@@ -546,7 +550,7 @@ func (ego *SliceList) AllObjects() bool {
 	return true
 }
 
-func (ego *SliceList) AllLists() bool {
+func (ego *list) AllLists() bool {
 	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(List)
@@ -557,7 +561,7 @@ func (ego *SliceList) AllLists() bool {
 	return true
 }
 
-func (ego *SliceList) AllStrings() bool {
+func (ego *list) AllStrings() bool {
 	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(*atString)
@@ -568,7 +572,7 @@ func (ego *SliceList) AllStrings() bool {
 	return true
 }
 
-func (ego *SliceList) AllBools() bool {
+func (ego *list) AllBools() bool {
 	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(*atBool)
@@ -579,7 +583,7 @@ func (ego *SliceList) AllBools() bool {
 	return true
 }
 
-func (ego *SliceList) AllInts() bool {
+func (ego *list) AllInts() bool {
 	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(*atInt)
@@ -590,7 +594,7 @@ func (ego *SliceList) AllInts() bool {
 	return true
 }
 
-func (ego *SliceList) AllFloats() bool {
+func (ego *list) AllFloats() bool {
 	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(*atFloat)
@@ -601,7 +605,7 @@ func (ego *SliceList) AllFloats() bool {
 	return true
 }
 
-func (ego *SliceList) AllNumeric() bool {
+func (ego *list) AllNumeric() bool {
 	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(*atInt)
@@ -615,7 +619,7 @@ func (ego *SliceList) AllNumeric() bool {
 	return true
 }
 
-func (ego *SliceList) ForEach(function func(int, any)) List {
+func (ego *list) ForEach(function func(int, any)) List {
 	ego.assert()
 	for i, item := range ego.val {
 		function(i, item.getVal())
@@ -623,7 +627,7 @@ func (ego *SliceList) ForEach(function func(int, any)) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) ForEachValue(function func(any)) List {
+func (ego *list) ForEachValue(function func(any)) List {
 	ego.assert()
 	for _, item := range ego.val {
 		function(item.getVal())
@@ -631,7 +635,7 @@ func (ego *SliceList) ForEachValue(function func(any)) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) ForEachObject(function func(Object)) List {
+func (ego *list) ForEachObject(function func(Object)) List {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.(Object)
@@ -642,7 +646,7 @@ func (ego *SliceList) ForEachObject(function func(Object)) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) ForEachList(function func(List)) List {
+func (ego *list) ForEachList(function func(List)) List {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.(List)
@@ -653,7 +657,7 @@ func (ego *SliceList) ForEachList(function func(List)) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) ForEachString(function func(string)) List {
+func (ego *list) ForEachString(function func(string)) List {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(string)
@@ -664,7 +668,7 @@ func (ego *SliceList) ForEachString(function func(string)) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) ForEachBool(function func(bool)) List {
+func (ego *list) ForEachBool(function func(bool)) List {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(bool)
@@ -675,7 +679,7 @@ func (ego *SliceList) ForEachBool(function func(bool)) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) ForEachInt(function func(int)) List {
+func (ego *list) ForEachInt(function func(int)) List {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(int)
@@ -686,7 +690,7 @@ func (ego *SliceList) ForEachInt(function func(int)) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) ForEachFloat(function func(float64)) List {
+func (ego *list) ForEachFloat(function func(float64)) List {
 	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(float64)
@@ -697,7 +701,7 @@ func (ego *SliceList) ForEachFloat(function func(float64)) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) Map(function func(int, any) any) List {
+func (ego *list) Map(function func(int, any) any) List {
 	ego.assert()
 	result := NewList()
 	for i, item := range ego.val {
@@ -706,7 +710,7 @@ func (ego *SliceList) Map(function func(int, any) any) List {
 	return result
 }
 
-func (ego *SliceList) MapValues(function func(any) any) List {
+func (ego *list) MapValues(function func(any) any) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -715,7 +719,7 @@ func (ego *SliceList) MapValues(function func(any) any) List {
 	return result
 }
 
-func (ego *SliceList) MapObjects(function func(Object) any) List {
+func (ego *list) MapObjects(function func(Object) any) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -727,7 +731,7 @@ func (ego *SliceList) MapObjects(function func(Object) any) List {
 	return result
 }
 
-func (ego *SliceList) MapLists(function func(List) any) List {
+func (ego *list) MapLists(function func(List) any) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -739,7 +743,7 @@ func (ego *SliceList) MapLists(function func(List) any) List {
 	return result
 }
 
-func (ego *SliceList) MapStrings(function func(string) any) List {
+func (ego *list) MapStrings(function func(string) any) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -751,7 +755,7 @@ func (ego *SliceList) MapStrings(function func(string) any) List {
 	return result
 }
 
-func (ego *SliceList) MapInts(function func(int) any) List {
+func (ego *list) MapInts(function func(int) any) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -763,7 +767,7 @@ func (ego *SliceList) MapInts(function func(int) any) List {
 	return result
 }
 
-func (ego *SliceList) MapFloats(function func(float64) any) List {
+func (ego *list) MapFloats(function func(float64) any) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -775,7 +779,7 @@ func (ego *SliceList) MapFloats(function func(float64) any) List {
 	return result
 }
 
-func (ego *SliceList) Reduce(initial any, function func(any, any) any) any {
+func (ego *list) Reduce(initial any, function func(any, any) any) any {
 	ego.assert()
 	result := initial
 	for _, item := range ego.val {
@@ -784,7 +788,7 @@ func (ego *SliceList) Reduce(initial any, function func(any, any) any) any {
 	return result
 }
 
-func (ego *SliceList) ReduceStrings(initial string, function func(string, string) string) string {
+func (ego *list) ReduceStrings(initial string, function func(string, string) string) string {
 	ego.assert()
 	result := initial
 	for _, item := range ego.val {
@@ -796,7 +800,7 @@ func (ego *SliceList) ReduceStrings(initial string, function func(string, string
 	return result
 }
 
-func (ego *SliceList) ReduceInts(initial int, function func(int, int) int) int {
+func (ego *list) ReduceInts(initial int, function func(int, int) int) int {
 	ego.assert()
 	result := initial
 	for _, item := range ego.val {
@@ -808,7 +812,7 @@ func (ego *SliceList) ReduceInts(initial int, function func(int, int) int) int {
 	return result
 }
 
-func (ego *SliceList) ReduceFloats(initial float64, function func(float64, float64) float64) float64 {
+func (ego *list) ReduceFloats(initial float64, function func(float64, float64) float64) float64 {
 	ego.assert()
 	result := initial
 	for _, item := range ego.val {
@@ -820,7 +824,7 @@ func (ego *SliceList) ReduceFloats(initial float64, function func(float64, float
 	return result
 }
 
-func (ego *SliceList) Filter(function func(any) bool) List {
+func (ego *list) Filter(function func(any) bool) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -831,7 +835,7 @@ func (ego *SliceList) Filter(function func(any) bool) List {
 	return result
 }
 
-func (ego *SliceList) FilterObjects(function func(Object) bool) List {
+func (ego *list) FilterObjects(function func(Object) bool) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -843,7 +847,7 @@ func (ego *SliceList) FilterObjects(function func(Object) bool) List {
 	return result
 }
 
-func (ego *SliceList) FilterLists(function func(List) bool) List {
+func (ego *list) FilterLists(function func(List) bool) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -855,7 +859,7 @@ func (ego *SliceList) FilterLists(function func(List) bool) List {
 	return result
 }
 
-func (ego *SliceList) FilterStrings(function func(string) bool) List {
+func (ego *list) FilterStrings(function func(string) bool) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -867,7 +871,7 @@ func (ego *SliceList) FilterStrings(function func(string) bool) List {
 	return result
 }
 
-func (ego *SliceList) FilterInts(function func(int) bool) List {
+func (ego *list) FilterInts(function func(int) bool) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -879,7 +883,7 @@ func (ego *SliceList) FilterInts(function func(int) bool) List {
 	return result
 }
 
-func (ego *SliceList) FilterFloats(function func(float64) bool) List {
+func (ego *list) FilterFloats(function func(float64) bool) List {
 	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
@@ -891,7 +895,7 @@ func (ego *SliceList) FilterFloats(function func(float64) bool) List {
 	return result
 }
 
-func (ego *SliceList) IntSum() int {
+func (ego *list) IntSum() int {
 	if !ego.AllInts() {
 		panic("All elements have to be ints.")
 	}
@@ -902,7 +906,7 @@ func (ego *SliceList) IntSum() int {
 	return result
 }
 
-func (ego *SliceList) Sum() float64 {
+func (ego *list) Sum() float64 {
 	if !ego.AllNumeric() {
 		panic("All elements have to be numeric.")
 	}
@@ -919,7 +923,7 @@ func (ego *SliceList) Sum() float64 {
 	return result
 }
 
-func (ego *SliceList) IntProd() int {
+func (ego *list) IntProd() int {
 	if !ego.AllInts() {
 		panic("All elements have to be ints.")
 	}
@@ -930,7 +934,7 @@ func (ego *SliceList) IntProd() int {
 	return result
 }
 
-func (ego *SliceList) Prod() float64 {
+func (ego *list) Prod() float64 {
 	if !ego.AllNumeric() {
 		panic("All elements have to be numeric.")
 	}
@@ -946,11 +950,11 @@ func (ego *SliceList) Prod() float64 {
 	return result
 }
 
-func (ego *SliceList) Avg() float64 {
+func (ego *list) Avg() float64 {
 	return ego.ptr.Sum() / float64(ego.Count())
 }
 
-func (ego *SliceList) IntMin() int {
+func (ego *list) IntMin() int {
 	if ego.AllInts() {
 		return ego.ptr.ReduceInts(math.MaxInt, func(min int, item int) int {
 			if item < min {
@@ -964,7 +968,7 @@ func (ego *SliceList) IntMin() int {
 	}
 }
 
-func (ego *SliceList) Min() float64 {
+func (ego *list) Min() float64 {
 	if ego.AllNumeric() {
 		return ego.ptr.Reduce(math.MaxFloat64, func(min any, item any) any {
 			val, ok := item.(int)
@@ -987,7 +991,7 @@ func (ego *SliceList) Min() float64 {
 	}
 }
 
-func (ego *SliceList) IntMax() int {
+func (ego *list) IntMax() int {
 	if ego.AllInts() {
 		return ego.ptr.ReduceInts(math.MinInt, func(max int, item int) int {
 			if item > max {
@@ -1001,7 +1005,7 @@ func (ego *SliceList) IntMax() int {
 	}
 }
 
-func (ego *SliceList) Max() float64 {
+func (ego *list) Max() float64 {
 	if ego.AllNumeric() {
 		return ego.ptr.Reduce(-math.MaxFloat64, func(max any, item any) any {
 			val, ok := item.(int)
@@ -1024,7 +1028,7 @@ func (ego *SliceList) Max() float64 {
 	}
 }
 
-func (ego *SliceList) ForEachAsync(function func(int, any)) List {
+func (ego *list) ForEachAsync(function func(int, any)) List {
 	ego.assert()
 	var wg sync.WaitGroup
 	step := func(group *sync.WaitGroup, i int, x any) {
@@ -1039,7 +1043,7 @@ func (ego *SliceList) ForEachAsync(function func(int, any)) List {
 	return ego.ptr
 }
 
-func (ego *SliceList) MapAsync(function func(int, any) any) List {
+func (ego *list) MapAsync(function func(int, any) any) List {
 	ego.assert()
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
@@ -1058,7 +1062,7 @@ func (ego *SliceList) MapAsync(function func(int, any) any) List {
 	return result
 }
 
-func (ego *SliceList) GetTF(tf string) any {
+func (ego *list) GetTF(tf string) any {
 	ego.assert()
 	if tf[0] != '#' || len(tf) < 2 {
 		panic("'" + tf + "' is not a valid tree form.")
@@ -1087,7 +1091,7 @@ func (ego *SliceList) GetTF(tf string) any {
 	return ego.ptr.Get(int(integer))
 }
 
-func (ego *SliceList) SetTF(tf string, value any) List {
+func (ego *list) SetTF(tf string, value any) List {
 	ego.assert()
 	if tf[0] != '#' || len(tf) < 2 {
 		panic("'" + tf + "' is not a valid tree form.")

@@ -23,6 +23,14 @@ type List interface {
 	Init(ptr List)
 
 	/*
+		Acquires the ego pointer previously set by Init.
+
+		Returns:
+		  - ego pointer.
+	*/
+	Ego() List
+
+	/*
 		Adds new elements at the end of the list.
 
 		Parameters:
