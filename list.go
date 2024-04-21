@@ -805,11 +805,11 @@ type List interface {
 	Prod() float64
 
 	/*
-		Computes an arithmetic average of all elements in the list.
+		Computes an arithmetic mean of all elements in the list.
 		The list has to be homogeneous and all its elements have to be numeric.
 
 		Returns:
-		  - computed average (float).
+		  - computed average value (float).
 	*/
 	Avg() float64
 

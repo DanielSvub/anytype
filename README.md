@@ -15,11 +15,11 @@ Types can be referenced by the `Type` enum (e.g. `anytype.TypeObject`, `anytype.
 
 ## Objects
 
-Object is an unordered set of key-value pairs. The default implementation, `MapObject` structure, is based on built-in Go maps. It is possible to make custom implementations by implementing the `Object` interface.
+Object is an unordered set of key-value pairs. The default implementation is based on built-in Go maps. It is possible to make custom implementations by implementing the `Object` interface.
 
 ### Constructors
 
-- `NewObject(vals ...any) Object` - Initial object values are specified as key value pairs. The function panics if an odd number of arguments is given,
+- `NewObject(values ...any) Object` - initial object values are specified as key value pairs. The function panics if an odd number of arguments is given,
 ```go
 emptyObject := anytype.NewObject()
 object := anytype.NewObject(
@@ -40,7 +40,7 @@ object := anytype.NewObjectFrom(map[string]int{
 ```go
 object, err := anytype.ParseObject(`{"first":1,"second":2}`)
 if err != nil {
-    ...
+    // ...
 }
 ```
 
@@ -48,7 +48,7 @@ if err != nil {
 ```go
 object, err := anytype.ParseFile("file.json")
 if err != nil {
-    ...
+    // ...
 }
 ```
 
@@ -96,7 +96,7 @@ float := object.GetFloat("float")
 - `TypeOf(key string) Type`.
 ```go
 if object.TypeOf("integer") == anytype.TypeInt {
-    ...
+    // ...
 }
 ```
 
@@ -111,7 +111,7 @@ fmt.Println(object.String())
 fmt.Println(object.FormatString(4))
 ```
 
-- `Dict() map[string]any`
+- `Dict() map[string]any` - exports the object to a Go map,
 ```go
 var dict map[string]any
 dict = object.Dict()
@@ -138,21 +138,21 @@ copy := object.Clone()
 - `Count() int` - returns a number of fileds of the object,
 ```go
 for i := 0; i < object.Count(); i++ {
-    ...
+    // ...
 }
 ```
 
-- `Empty() bool` - checks whether the object is empty (has 0 fields),
+- `Empty() bool` - checks whether the object is empty,
 ```go
 if object.Empty() {
-    ...
+    // ...
 }
 ```
 
-- `Equals(another Object) bool` - checks whether all fields of the object are equal to the fields in another object,
+- `Equals(another Object) bool` - checks whether all fields of the object are equal to the fields of another object,
 ```go
 if object.Equals(another) {
-    ...
+    // ...
 }
 ```
 
@@ -166,10 +166,10 @@ merged := object.Merge(another)
 plucked := object.Pluck("first", "second")
 ```
 
-- `Contains(elem any) bool` - checks whether the objects contains a value,
+- `Contains(elem any) bool` - checks whether the object contains a value,
 ```go
 if object.Contains(1) {
-    ...
+    // ...
 }
 ```
 
@@ -181,7 +181,7 @@ first := object.KeyOf(1)
 - `KeyExists(key string) bool` - checks whether a key exists in the object.
 ```go
 if object.KeyExists("first") {
-    ...
+    // ...
 }
 ```
 
@@ -189,44 +189,44 @@ if object.KeyExists("first") {
 - `ForEach(function func(string, any)) Object` - executes a given function over an every field of the object,
 ```go
 object.ForEach(func(key string, value any) {
-    ...
+    // ...
 })
 ```
 
 - `ForEachValue(function func(any)) Object` - ForEach without the key variable within the anonymous function,
 ```go
 object.ForEachValue(func(value any) {
-    ...
+    // ...
 })
 ```
 
-- type-specific ForEaches - anonymous function is only executed over values with the corresponding type.
+- type-specific ForEaches - anonymous function is only executed over values of the corresponding type.
 ```go
 object.ForEachObject(func(object anytype.Object) {
-    ...
+    // ...
 })
 object.ForEachList(func(list anytype.List) {
-    ...
+    // ...
 })
 object.ForEachString(func(str string) {
-    ...
+    // ...
 })
 object.ForEachBool(func(object bool) {
-    ...
+    // ...
 })
 object.ForEachInt(func(integer int) {
-    ...
+    // ...
 })
 object.ForEachFloat(func(float float64) {
-    ...
+    // ...
 })
 ```
 
-### Mapping
+### Mappings
 - `Map(function func(string, any) any) Object` - returns a new object with fields modified by a given function,
 ```go
 mapped := object.Map(func(key string, value any) any {
-    ...
+    // ...
 	return newValue
 })
 ```
@@ -234,31 +234,31 @@ mapped := object.Map(func(key string, value any) any {
 - `MapValues(function func(any) any) Object` - Map without the key variable within the anonymous function,
 ```go
 mapped := object.MapValues(func(value any) any {
-    ...
+    // ...
 	return newValue
 })
 ```
 
-- type-specific Maps - selects only fields with the corresponding type.
+- type-specific Maps - selects only fields of the corresponding type.
 ```go
 objects := object.MapObjects(func(object anytype.Object) any {
-    ...
+    // ...
 	return newValue
 })
-lists := object.MapLists(func(object anytype.List) any {
-    ...
+lists := object.MapLists(func(list anytype.List) any {
+    // ...
 	return newValue
 })
-strs := object.MapStrings(func(object string) any {
-    ...
+strs := object.MapStrings(func(str string) any {
+    // ...
 	return newValue
 })
-integers := object.MapInts(func(object int) any {
-    ...
+integers := object.MapInts(func(integer int) any {
+    // ...
 	return newValue
 })
-floats := object.MapFloats(func(object float64) any {
-    ...
+floats := object.MapFloats(func(float float64) any {
+    // ...
 	return newValue
 })
 ```
@@ -267,14 +267,14 @@ floats := object.MapFloats(func(object float64) any {
 - `ForEachAsync(function func(string, any)) Object` - performs the ForEach paralelly,
 ```go
 object.ForEachAsync(func(key string, value any) {
-    ...
+    // ...
 })
 ```
 
 - `MapAsync(function func(string, any) any) Object` - performs the Map paralelly.
 ```go
 mapped := object.MapAsync(func(key string, value any) any {
-    ...
+    // ...
 	return newValue
 })
 ```
@@ -292,108 +292,483 @@ object.SetTF(".first#2", 2)
 
 ## Lists
 
-List is an ordered sequence of values. The default implementation, `sliceList` structure, is based on built-in Go slices. It is possible to make custom implementations by implementing the `List` interface.
+List is an ordered sequence of elements. The default implementation is based on built-in Go slices. It is possible to make custom implementations by implementing the `List` interface.
+
+### Constructors
+
+- `NewList(values ...any) List` - initial list elements could be given as variadic arguments,
+```go
+emptyList := anytype.NewList()
+list := anytype.NewList(1, 2, 3)
+```
+
+- `NewListOf(value any, count int) List` - creates a list of n repeated values,
+```go
+list := anytype.NewListOf(nil, 10)
+```
+
+- `NewListFrom(slice any) List` - creates a list from a given Go slice. Any slice of a compatible type (including any) can be used,
+```go
+list := anytype.NewListOf(nil, 10)
+```
+
+- `ParseList(json string) (List, error)` - loads a list from a JSON string,
+```go
+list, err := anytype.ParseList(`[1, 2, 3]`)
+if err != nil {
+    // ...
+}
+```
 
 ### Manipulation With Elements
-- `Add(val ...any) List`
-- `Insert(index int, value any) List`
-- `Replace(index int, value any) List`
-- `Delete(index ...int) List`
-- `Pop() List`
-- `Clear() List`
+- `Add(val ...any) List` - adds any amount of new elements to the list,
+```go
+list.Add(1, 2, 3)
+```
+
+- `Insert(index int, value any) List` - inserts new element to a specific position in the list,
+```go
+list.Insert(1, 1.5)
+```
+
+- `Replace(index int, value any) List` - replaces an existing element,
+```go
+list.Replace(1, "2")
+```
+
+- `Delete(index ...int) List` - deletes specified elements,
+```go
+list.Delete(1, 2)
+```
+
+- `Pop() List` - Deletes the last element in the list,
+```go
+list.Pop()
+```
+
+- `Clear() List` - removes all elements from the list.
+```go
+list.Clear()
+```
 
 ### Getting Elements
-- `Get(index int) any`
-- `GetObject(index int) Object`
-- `GetList(index int) List`
-- `GetString(index int) string`
-- `GetBool(index int) bool`
-- `GetInt(index int) int`
-- `GetFloat(index int) float64`
+- Universal getter (requires type assertion),
+```go
+object := list.Get(0).(anytype.Object)
+nested := list.Get(1).(anytype.List)
+str := list.Get(2).(string)
+boolean := list.Get(3).(bool)
+integer := list.Get(4).(int)
+float := list.Get(5).(float64)
+```
+- type-specific getters.
+```go
+object := list.GetObject(0)
+nested := list.GetList(1)
+str := list.GetString(2)
+boolean := list.GetBool(3)
+integer := list.GetInt(4)
+float := list.GetFloat(5)
+```
 
 ### Type Check
-- `TypeOf(index int) Type`
+- `TypeOf(index int) Type`.
+```go
+if list.TypeOf(0) == anytype.TypeInt {
+    // ...
+}
+```
 
 ### Export
-- `String() string`
-- `FormatString(indent int) string`
-- `Slice() []any`
-- `ObjectSlice() []Object`
-- `ListSlice() []List`
-- `StringSlice() []string`
-- `BoolSlice() []bool`
-- `IntSlice() []int`
-- `FloatSlice() []float64`
+- `String() string` - exports the list to a JSON string,
+```go
+fmt.Println(list.String())
+```
+
+- `FormatString(indent int) string` - exports the list to a well-arranged JSON string with the given indentation, 
+```go
+fmt.Println(list.FormatString(4))
+```
+
+- `Slice() []any` - exports the list to a Go slice,
+```go
+var slice []any
+slice = list.Slice()
+```
+
+- export to type-specific slices - panics if the list is not homogeneous,
+```go
+var objects []anytype.Object
+objects = list.ObjectSlice()
+var lists []anytype.List
+lists = list.ListSlice()
+var strs []string
+strs = list.StringSlice()
+var bools []bool
+bools = list.BoolSlice()
+var ints []int
+ints = list.IntSlice()
+var floats []float64
+floats = list.FloatSlice()
+```
 
 ### Features Over Whole List
-- `Clone() List`
-- `Count() int`
-- `Empty() bool`
-- `Equals(another List) bool`
-- `Concat(another List) List`
-- `SubList(start int, end int) List`
-- `Contains(elem any) bool`
-- `IndexOf(elem any) int`
-- `Sort() List`
-- `Reverse() List`
+- `Clone() List` - performs a deep copy of the list,
+```go
+copy := list.Clone()
+```
+
+- `Count() int` - returns a number of elements of the list,
+```go
+for i := 0; i < list.Count(); i++ {
+    // ...
+}
+```
+
+- `Empty() bool` - checks whether the list is empty,
+```go
+if list.Empty() {
+    // ...
+}
+```
+
+- `Equals(another List) bool` - checks whether all elements of the list are equal to the elements of another list,
+```go
+if list.Equals(another) {
+    // ...
+}
+```
+
+- `Concat(another List) List` - concates two lists together,
+```go
+concated := list.Concat(another)
+```
+
+- `SubList(start int, end int) List` - cuts a part of the list,
+```go
+subList := list.SubList(1, 3)
+```
+
+- `Contains(elem any) bool` - checks whether the list contains a value,
+```go
+if list.Contains("value") {
+    // ...
+}
+```
+
+- `IndexOf(elem any) int` - returns a position of the first occurrence of the given value,
+```go
+elem := list.IndexOf("value")
+```
+
+- `Sort() List` - sorts the elements in the list. List has to be homogeneous and the elements have to be either numeric or strings,
+```go
+list.Sort()
+```
+
+- `Reverse() List` - reverses the list,
+```go
+list.Reverse()
+```
 
 ### Checks For Homogeneity
-- `AllObjects() bool`
-- `AllLists() bool`
-- `AllStrings() bool`
-- `AllBools() bool`
-- `AllInts() bool`
-- `AllFloats() bool`
-- `AllNumeric() bool`
+- `AllNumeric() bool` - checks if all elements are numbers (either ints or floats),
+```go
+if list.AllNumeric() {
+    // ...
+}
+```
+
+- type-specific asserts.
+```go
+if list.AllObjects() {
+    // ...
+} else if list.AllLists() {
+    // ...
+} else if list.AllStrings() {
+    // ...
+} else if list.AllBools() {
+    // ...
+} else if list.AllInts() {
+    // ...
+} else if list.AllFloats() {
+    // ...
+} else {
+    // ...
+}
+```
 
 ### ForEaches
-- `ForEach(function func(int, any)) List`
-- `ForEachValue(function func(any)) List`
-- `ForEachObject(function func(Object)) List`
-- `ForEachList(function func(List)) List`
-- `ForEachString(function func(string)) List`
-- `ForEachBool(function func(bool)) List`
-- `ForEachInt(function func(int)) List`
-- `ForEachFloat(function func(float64)) List`
+- `ForEach(function func(int, any)) List` - executes a given function over an every element of the list,
+```go
+list.ForEach(func(index int, value any) {
+    // ...
+})
+```
+
+- `ForEachValue(function func(any)) List` - ForEach without the index variable within the anonymous function,
+```go
+list.ForEachValue(func(value any) {
+    // ...
+})
+```
+
+- type-specific ForEaches - anonymous function is only executed over values of the corresponding type.
+```go
+list.ForEachObject(func(object anytype.Object) {
+    // ...
+})
+list.ForEachList(func(list anytype.List) {
+    // ...
+})
+list.ForEachString(func(str string) {
+    // ...
+})
+list.ForEachBool(func(object bool) {
+    // ...
+})
+list.ForEachInt(func(integer int) {
+    // ...
+})
+list.ForEachFloat(func(float float64) {
+    // ...
+})
+```
 
 ### Mappings
-- `Map(function func(int, any) any) List`
-- `MapValues(function func(any) any) List`
-- `MapObjects(function func(Object) any) List`
-- `MapLists(function func(List) any) List`
-- `MapStrings(function func(string) any) List`
-- `MapInts(function func(int) any) List`
-- `MapFloats(function func(float64) any) List`
+- `Map(function func(int, any) any) List` - returns a new list with elements modified by a given function,
+```go
+mapped := list.Map(func(index int, value any) any {
+    // ...
+	return newValue
+})
+```
+
+- `MapValues(function func(any) any) List` - Map without the index variable within the anonymous function,
+```go
+mapped := list.MapValues(func(value any) any {
+    // ...
+	return newValue
+})
+```
+
+- type-specific Maps - selects only elements of the corresponding type.
+```go
+objects := list.MapObjects(func(object anytype.Object) any {
+    // ...
+	return newValue
+})
+lists := list.MapLists(func(list anytype.List) any {
+    // ...
+	return newValue
+})
+strs := list.MapStrings(func(str string) any {
+    // ...
+	return newValue
+})
+integers := list.MapInts(func(integer int) any {
+    // ...
+	return newValue
+})
+floats := list.MapFloats(func(float float64) any {
+    // ...
+	return newValue
+})
+```
 
 ### Reductions
-- `Reduce(initial any, function func(any, any) any) any`
-- `ReduceStrings(initial string, function func(string, string) string) string`
-- `ReduceInts(initial int, function func(int, int) int) int`
-- `ReduceFloats(initial float64, function func(float64, float64) float64) float64`
+- `Reduce(initial any, function func(any, any) any) any` - reduces all elements of the list into a single value,
+```go
+result := list.Reduce(0, func(sum, value any) any {
+	return sum.(int) + value.(int)
+})
+```
+
+- type-specific Reductions - selects only elements of the corresponding type. Return value has to be of the same type.
+```go
+result := list.ReduceStrings("", func(concated, value string) string {
+	return concated + value
+})
+result := list.ReduceInts(0, func(sum, value int) int {
+	return sum + value
+})
+result := list.ReduceFloats(0, func(sum, value float64) float64 {
+	return sum + value
+})
+```
 
 ### Filters
-- `Filter(function func(any) bool) List`
-- `FilterObjects(function func(Object) bool) List`
-- `FilterLists(function func(List) bool) List`
-- `FilterStrings(function func(string) bool) List`
-- `FilterInts(function func(int) bool) List`
-- `FilterFloats(function func(float64) bool) List`
+- `Filter(function func(any) bool) List` - filters elements in the list based on a condition,
+```go
+filtered := list.Filter(func(value any) bool {
+    // ...
+	return condition
+})
+```
+
+- type-specific Filters - filters only elements of the corresponding type.
+```go
+objects := list.FilterObjects(func(value anytype.Object) bool {
+    // ...
+	return condition
+})
+lists := list.FilterLists(func(value anytype.List) bool {
+    // ...
+	return condition
+})
+strs := list.FilterStrings(func(value string) bool {
+    // ...
+	return condition
+})
+integers := list.FilterInts(func(value int) bool {
+    // ...
+	return condition
+})
+floats := list.FilterFloats(func(value float64) bool {
+    // ...
+	return condition
+})
+```
 
 ### Numeric Operations
-- `IntSum() int`
-- `Sum() float64`
-- `IntProd() int`
-- `Prod() float64`
-- `Avg() float64`
-- `IntMin() int`
-- `Min() float64`
-- `IntMax() int`
-- `Max() float64`
+- `IntSum() int` - computes a sum of all elements in the list if all of them are ints,
+```go
+sum := list.IntSum()
+```
+
+- `Sum() float64` - works with both numeric types, returns float,
+```go
+sum := list.Sum()
+```
+- `IntProd() int` - computes a product of all elements in the list if all of them are ints,
+```go
+product := list.IntProd()
+```
+
+- `Prod() float64` - works with both numeric types, returns float,
+```go
+product := list.Prod()
+```
+
+- `Avg() float64` - computes and arithmetic mean of all elements in the list,
+```go
+average := list.Avg()
+```
+
+- `IntMin() int` - returns a minimum value in the list (if all elements are ints),
+```go
+minimum := list.IntMin()
+```
+
+- `Min() float64` - works with both numeric types, returns float,
+```go
+minimum := list.Min()
+```
+
+- `IntMax() int` - returns a maximum value in the list (if all elements are ints),
+```go
+maximum := list.IntMax()
+```
+
+- `Max() float64` - works with both numeric types, returns float,
+```go
+maximum := list.Max()
+```
 
 ### Async
-- `ForEachAsync(function func(int, any)) List`
-- `MapAsync(function func(int, any) any) List`
+- `ForEachAsync(function func(int, any)) List` - performs the ForEach paralelly,
+```go
+list.ForEachAsync(func(index int, value any) {
+    // ...
+})
+```
+
+- `MapAsync(function func(int, any) any) List` - performs the Map paralelly.
+```go
+mapped := list.MapAsync(func(index int, value any) any {
+    // ...
+	return newValue
+})
+```
 
 ### Tree Form
-- `GetTF(tf string) any`
-- `SetTF(tf string, value any) List`
+- `GetTF(tf string) any` - returns a value specified by the given tree form string,
+```go
+value := list.GetTF("#2.first")
+```
+
+- `SetTF(tf string, value any) List` - sets a value on the path specified by the given tree form string.
+```go
+list.SetTF("#2.first", 2)
+```
+
+## Derived Structures
+AnyType supports inheritance and method overriding by defining custom structures with object or list embedded in them. As Go uses the embedded pointer as receiver instead of the structure itself, the pointer to the derived structure ("ego pointer") has to be stored using the method `Init(ptr Object)`/`Init(ptr List)`. When overriding a method, the ego pointer can be obtained with `Ego() Object`/`Ego() List`.
+
+```go
+// Embeds an object
+type Animal struct {
+	anytype.Object
+	name string
+}
+
+func NewAnimal(name string, age int) *Animal {
+	ego := &Animal{
+		Object: anytype.NewObject(
+			"value", age,
+		),
+		name: name,
+	}
+	ego.Init(ego) // Ego pointer initialization
+	return ego
+}
+
+// Method overriding
+func (ego *Animal) Clear() anytype.Object {
+	fmt.Fprintln(os.Stderr, "fields of an animal cannot be cleared")
+	return ego.Ego() // Using stored pointer to return Animal insted of embedded object
+}
+
+func (ego *Animal) Breathe() {
+	fmt.Println("breathing")
+}
+
+// Inherits from animal, adds another field
+type Dog struct {
+	*Animal
+	breed string
+}
+
+func NewDog(name string, age int, breed string) *Dog {
+	ego := &Dog{
+		Animal: NewAnimal(name, age),
+		breed:  breed,
+	}
+	ego.Init(ego) // Ego pointer initialization
+	return ego
+}
+
+// Method overriding
+func (ego *Dog) Unset(keys ...string) anytype.Object {
+	fmt.Fprintln(os.Stderr, "fields of a dog cannot be unset")
+	return ego.Ego() // Using stored pointer to return Dog insted of object
+}
+
+func (ego *Dog) Bark() {
+	fmt.Println("woof")
+}
+
+func main() {
+
+	dog := NewDog("Rex", 2, "German Shepherd")
+
+	// Methods from both Dog and Animal can be used
+	dog.Breathe()
+	dog.Bark()
+
+	// Both methods have been overridden
+	dog.Unset("age")
+	dog.Clear()
+
+}
+```

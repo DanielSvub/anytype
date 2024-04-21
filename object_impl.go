@@ -36,10 +36,10 @@ Parameters:
 Returns:
   - pointer to the created object.
 */
-func NewObject(vals ...any) Object {
+func NewObject(values ...any) Object {
 	ego := &object{val: make(map[string]field)}
 	ego.ptr = ego
-	ego.Set(vals...)
+	ego.Set(values...)
 	return ego
 }
 
