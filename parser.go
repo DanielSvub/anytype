@@ -25,6 +25,7 @@ const (
 	stateKeyEscape
 	stateAfterKey
 	stateVal
+	stateAfterVal
 	stateValEscape
 	stateValString
 	stateValAfterString
@@ -316,6 +317,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 				}
 				i += pos
 				object.Set(key, o)
+				state = stateAfterVal
 				continue
 			}
 
@@ -327,6 +329,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 				}
 				i += pos
 				object.Set(key, l)
+				state = stateAfterVal
 				continue
 			}
 
@@ -350,6 +353,30 @@ func parseObject(json string, line *int) (Object, int, error) {
 			// Inside the value
 			val += string(char)
 			inVal = true
+
+		// After nested object or list
+		case stateAfterVal:
+
+			// Whitespace (skipping)
+			if unicode.IsSpace(char) {
+				continue
+			}
+
+			if char == ',' || char == '}' {
+				if char == ',' {
+					state = stateKeyStart
+					continue
+				}
+				return object, i, nil
+			}
+
+			if char == '"' {
+				key = ""
+				state = stateKey
+				continue
+			}
+
+			return nil, 0, fmt.Errorf("not a valid JSON - expecting ',' or '}', got '%s' on line %d", string(char), *line)
 
 		// Parsing a string
 		case stateValString:
