@@ -1,6 +1,7 @@
 package anytype_test
 
 import (
+	"os"
 	"strconv"
 	"sync"
 	"testing"
@@ -21,10 +22,11 @@ var (
 
 func TestObject(t *testing.T) {
 	t.Run("basics", func(t *testing.T) {
+		l := anytype.NewList()
 		o := Object(
 			"first", 1,
 			"second", 2,
-			"third", 3,
+			"third", l,
 		)
 		if !o.Keys().Contains("second") {
 			t.Error("Key list should contain the key.")
@@ -32,8 +34,8 @@ func TestObject(t *testing.T) {
 		if !o.Values().Contains(2) {
 			t.Error("Value list should contain the value.")
 		}
-		if !o.Contains(3) {
-			t.Error("Object should contain value 3.")
+		if !o.Contains(l) {
+			t.Error("Key list should contain the key.")
 		}
 		if o.Contains(4) {
 			t.Error("Object should  not contain value 4.")
@@ -779,6 +781,60 @@ func TestParsing(t *testing.T) {
 		)
 		if o.FormatString(2) != "{\n  \"key\": \"value\"\n}" {
 			t.Error("JSON formatted export does not work properly.")
+		}
+	})
+
+	t.Run("errors", func(t *testing.T) {
+		if _, err := anytype.ParseObject(""); err == nil {
+			t.Error("Parser did not return expected error.")
+		}
+		if _, err := anytype.ParseObject("{\"test\":1"); err == nil {
+			t.Error("Parser did not return expected error.")
+		}
+		if _, err := anytype.ParseObject("{\"test\"1"); err == nil {
+			t.Error("Parser did not return expected error.")
+		}
+		if _, err := anytype.ParseObject("{1:2}"); err == nil {
+			t.Error("Parser did not return expected error.")
+		}
+		if _, err := anytype.ParseObject("{\"test\":[]2}"); err == nil {
+			t.Error("Parser did not return expected error.")
+		}
+		if _, err := anytype.ParseList(""); err == nil {
+			t.Error("Parser did not return expected error.")
+		}
+		if _, err := anytype.ParseList("[1,2"); err == nil {
+			t.Error("Parser did not return expected error.")
+		}
+		if _, err := anytype.ParseList("[test]"); err == nil {
+			t.Error("Parser did not return expected error.")
+		}
+	})
+
+	t.Run("repairs", func(t *testing.T) {
+		if _, err := anytype.ParseObject("{\"first\":{}\"second\":2}"); err != nil {
+			t.Error("Parser did not repair broken JSON.")
+		}
+		if _, err := anytype.ParseObject("{\"first\":1 2}"); err != nil {
+			t.Error("Parser did not repair broken JSON.")
+		}
+		if _, err := anytype.ParseList("[nu ll,[]2]"); err != nil {
+			t.Error("Parser did not repair broken JSON.")
+		}
+	})
+
+	t.Run("file", func(t *testing.T) {
+		if _, err := anytype.ParseFile("test.json"); err == nil {
+			t.Error("Opened a file which should not exist.")
+		}
+		if err := os.WriteFile("test.json", []byte("{\"first\":[],\"second\":2}"), 0644); err != nil {
+			t.Fatal("Unable to create the JSON file.")
+		}
+		if _, err := anytype.ParseFile("test.json"); err != nil {
+			t.Error("Cannot parse JSON from file.")
+		}
+		if err := os.Remove("test.json"); err != nil {
+			t.Fatal("Unable to delete the JSON file.")
 		}
 	})
 
