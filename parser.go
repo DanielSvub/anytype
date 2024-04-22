@@ -238,7 +238,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 
 		switch state {
 
-		// List creation
+		// Object creation
 		case stateStart:
 			if char != '{' {
 				return nil, 0, fmt.Errorf("not a valid JSON - expecting '{', got '%s' on line %d", string(char), *line)

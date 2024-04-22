@@ -22,7 +22,7 @@ var (
 
 func TestObject(t *testing.T) {
 	t.Run("basics", func(t *testing.T) {
-		l := anytype.NewList()
+		l := List()
 		o := Object(
 			"first", 1,
 			"second", 2,

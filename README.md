@@ -263,7 +263,7 @@ floats := object.MapFloats(func(float float64) any {
 })
 ```
 
-### Async
+### Asynchronous
 - `ForEachAsync(function func(string, any)) Object` - performs the ForEach paralelly,
 ```go
 object.ForEachAsync(func(key string, value any) {
@@ -675,7 +675,7 @@ maximum := list.IntMax()
 maximum := list.Max()
 ```
 
-### Async
+### Asynchronous
 - `ForEachAsync(function func(int, any)) List` - performs the ForEach paralelly,
 ```go
 list.ForEachAsync(func(index int, value any) {
@@ -715,7 +715,7 @@ type Animal struct {
 func NewAnimal(name string, age int) *Animal {
 	ego := &Animal{
 		Object: anytype.NewObject(
-			"value", age,
+			"age", age,
 		),
 		name: name,
 	}
@@ -765,6 +765,12 @@ func main() {
 	// Methods from both Dog and Animal can be used
 	dog.Breathe()
 	dog.Bark()
+
+    // Methods of the object can be used, too
+	dog.Set("color", "black")
+
+	// Printing the object inside
+	fmt.Println(dog.String())
 
 	// Both methods have been overridden
 	dog.Unset("age")
