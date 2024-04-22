@@ -837,8 +837,10 @@ func TestParsing(t *testing.T) {
 			t.Fatal("Unable to delete the JSON file.")
 		}
 	})
+}
 
-	t.Run("tf", func(t *testing.T) {
+func TestTF(t *testing.T) {
+	t.Run("valid", func(t *testing.T) {
 		l := List()
 		l.SetTF("#0#0", 1)
 		l.SetTF("#0#1", 2).SetTF("#0#2.test.inner#0", 1)
@@ -846,6 +848,31 @@ func TestParsing(t *testing.T) {
 		result := l.GetTF("#0#2.test.inner#1.target#0").(int)
 		if result != 5 {
 			t.Error("Tree form handling does not work properly.")
+		}
+		if l.GetTF("#0#2.test") == nil {
+			t.Error("Valid TF returns nil.")
+		}
+	})
+
+	t.Run("invalid", func(t *testing.T) {
+		l := List().SetTF("#0#0.test.inner#0", 5)
+		if l.GetTF("#5") != nil {
+			t.Error("Invalid TF does not return nil.")
+		}
+		if l.GetTF("#0#0#0") != nil {
+			t.Error("Invalid TF does not return nil.")
+		}
+		if l.GetTF("#0#0.nil") != nil {
+			t.Error("Invalid TF does not return nil.")
+		}
+		if l.GetTF("#0#0.test#0") != nil {
+			t.Error("Invalid TF does not return nil.")
+		}
+		if l.GetTF("#0.test") != nil {
+			t.Error("Invalid TF does not return nil.")
+		}
+		if l.GetTF("#0#0.test.inner.nil") != nil {
+			t.Error("Invalid TF does not return nil.")
 		}
 	})
 }

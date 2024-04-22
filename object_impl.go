@@ -612,10 +612,21 @@ func (ego *object) GetTF(tf string) any {
 	dot := strings.Index(tf, ".")
 	hash := strings.Index(tf, "#")
 	if dot > 0 && (hash < 0 || dot < hash) {
-		return ego.ptr.GetObject(tf[:dot]).GetTF(tf[dot:])
+		key := tf[:dot]
+		if !ego.ptr.KeyExists(key) || ego.ptr.TypeOf(key) != TypeObject {
+			return nil
+		}
+		return ego.ptr.GetObject(key).GetTF(tf[dot:])
 	}
 	if hash > 0 && (dot < 0 || hash < dot) {
-		return ego.ptr.GetList(tf[:hash]).GetTF(tf[hash:])
+		key := tf[:hash]
+		if !ego.ptr.KeyExists(key) || ego.ptr.TypeOf(key) != TypeList {
+			return nil
+		}
+		return ego.ptr.GetList(key).GetTF(tf[hash:])
+	}
+	if !ego.ptr.KeyExists(tf) {
+		return nil
 	}
 	return ego.ptr.Get(tf)
 }

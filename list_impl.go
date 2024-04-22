@@ -1079,6 +1079,10 @@ func (ego *list) GetTF(tf string) any {
 		if err != nil {
 			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:dot]))
 		}
+		index := int(integer)
+		if index >= ego.ptr.Count() || ego.ptr.TypeOf(index) != TypeObject {
+			return nil
+		}
 		return ego.ptr.GetObject(int(integer)).GetTF(tf[dot:])
 	}
 	if hash > 0 && (dot < 0 || hash < dot) {
@@ -1086,13 +1090,21 @@ func (ego *list) GetTF(tf string) any {
 		if err != nil {
 			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:hash]))
 		}
-		return ego.ptr.GetList(int(integer)).GetTF(tf[hash:])
+		index := int(integer)
+		if index >= ego.ptr.Count() || ego.ptr.TypeOf(index) != TypeList {
+			return nil
+		}
+		return ego.ptr.GetList(index).GetTF(tf[hash:])
 	}
 	integer, err := strconv.ParseInt(tf, 0, bits.UintSize)
 	if err != nil {
 		panic(fmt.Sprintf("'%s' cannot be converted to int", tf))
 	}
-	return ego.ptr.Get(int(integer))
+	index := int(integer)
+	if index >= ego.ptr.Count() {
+		return nil
+	}
+	return ego.ptr.Get(index)
 }
 
 func (ego *list) SetTF(tf string, value any) List {
