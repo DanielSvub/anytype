@@ -318,6 +318,9 @@ func (ego *list) GetFloat(index int) float64 {
 
 func (ego *list) TypeOf(index int) Type {
 	ego.assert()
+	if index >= ego.Count() {
+		return TypeUndefined
+	}
 	switch ego.val[index].(type) {
 	case *atString:
 		return TypeString

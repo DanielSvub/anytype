@@ -19,7 +19,8 @@ type Type uint8
 Enum of AnyType data types.
 */
 const (
-	TypeNil Type = iota
+	TypeUndefined Type = iota
+	TypeNil
 	TypeObject
 	TypeList
 	TypeString

@@ -273,7 +273,12 @@ func (ego *object) GetFloat(key string) float64 {
 
 func (ego *object) TypeOf(key string) Type {
 	ego.assert()
+	if !ego.KeyExists(key) {
+		return TypeUndefined
+	}
 	switch ego.val[key].(type) {
+	case *atNil:
+		return TypeNil
 	case *atString:
 		return TypeString
 	case *atInt:
@@ -286,8 +291,6 @@ func (ego *object) TypeOf(key string) Type {
 		return TypeObject
 	case *list:
 		return TypeList
-	case *atNil:
-		return TypeNil
 	default:
 		panic("unknown field type")
 	}
