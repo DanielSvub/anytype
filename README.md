@@ -726,7 +726,7 @@ func NewAnimal(name string, age int) *Animal {
 // Method overriding
 func (ego *Animal) Clear() anytype.Object {
 	fmt.Fprintln(os.Stderr, "fields of an animal cannot be cleared")
-	return ego.Ego() // Using stored pointer to return Animal insted of embedded object
+	return ego.Ego() // Using stored pointer to return Animal instead of embedded object
 }
 
 func (ego *Animal) Breathe() {

@@ -33,7 +33,7 @@ type Object interface {
 	/*
 		Sets a values of the fields.
 		If the key already exists, the value is overwritten, if not, new field is created.
-		If one key is given multiple times, the value is set to the last one.
+		If one key is given multiple times, the value is set to the last provided value.
 
 		Parameters:
 		  - values... - any amount of key-value pairs to set.

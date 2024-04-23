@@ -11,13 +11,10 @@ import (
 )
 
 /*
-Type for AnyType data types.
+AnyType data type.
 */
 type Type uint8
 
-/*
-Enum of AnyType data types.
-*/
 const (
 	TypeUndefined Type = iota
 	TypeNil
@@ -110,14 +107,14 @@ func parseVal(val any) field {
 	case nil:
 		return newNil()
 	default:
-		panic("Unknown type.")
+		panic("unknown type")
 	}
 }
 
 /*
 Structure encapsulating a string value.
 Implements:
-  - Fielder.
+  - field.
 */
 type atString struct {
 	val string
@@ -137,7 +134,7 @@ func newString(val string) *atString {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Acquires the value of the field, in this case a string value (string is a value type).
 Returns:
   - value of the field.
@@ -147,7 +144,7 @@ func (ego *atString) getVal() any {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Creates a deep copy of the field, in this case a new string.
 Returns:
   - deep copy of the field.
@@ -157,7 +154,7 @@ func (ego *atString) copy() any {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Serializes the field into the JSON format, in this case simply prints the value.
 Returns:
   - string representing serialized field.
@@ -168,7 +165,7 @@ func (ego *atString) serialize() string {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Checks if the content of the field is equal to the given field.
 Returns:
   - true if the fields are equal, false otherwise.
@@ -184,7 +181,7 @@ func (ego *atString) isEqual(another any) bool {
 /*
 Structure encapsulating a boolean value.
 Implements:
-  - Fielder.
+  - field.
 */
 type atBool struct {
 	val bool
@@ -204,7 +201,7 @@ func newBool(val bool) *atBool {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Acquires the value of the field, in this case a bool value (bool is a value type).
 Returns:
   - value of the field.
@@ -214,7 +211,7 @@ func (ego *atBool) getVal() any {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Serializes the field into the JSON format, in this case prints a string representation of the value.
 Returns:
   - string representing serialized field.
@@ -224,7 +221,7 @@ func (ego *atBool) serialize() string {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Creates a deep copy of the field, in this case a new bool.
 Returns:
   - deep copy of the field.
@@ -234,7 +231,7 @@ func (ego *atBool) copy() any {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Checks if the content of the field is equal to the given field.
 Returns:
   - true if the fields are equal, false otherwise.
@@ -250,7 +247,7 @@ func (ego *atBool) isEqual(another any) bool {
 /*
 Structure encapsulating an integer value.
 Implements:
-  - Fielder.
+  - field.
 */
 type atInt struct {
 	val int
@@ -270,7 +267,7 @@ func newInt(val int) *atInt {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Acquires the value of the field, in this case an int value (int is a value type).
 Returns:
   - value of the field.
@@ -280,7 +277,7 @@ func (ego *atInt) getVal() any {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Serializes the field into the JSON format, in this case prints a string representation of the value.
 Returns:
   - string representing serialized field.
@@ -290,7 +287,7 @@ func (ego *atInt) serialize() string {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Creates a deep copy of the field, in this case a new int.
 Returns:
   - deep copy of the field.
@@ -300,7 +297,7 @@ func (ego *atInt) copy() any {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Checks if the content of the field is equal to the given field.
 Returns:
   - true if the fields are equal, false otherwise.
@@ -316,7 +313,7 @@ func (ego *atInt) isEqual(another any) bool {
 /*
 Structure encapsulating a float value.
 Implements:
-  - Fielder.
+  - field.
 */
 type atFloat struct {
 	val float64
@@ -336,7 +333,7 @@ func newFloat(val float64) *atFloat {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Acquires the value of the field, in this case a float value (float is a value type).
 Returns:
   - value of the field.
@@ -346,7 +343,7 @@ func (ego *atFloat) getVal() any {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Serializes the field into the JSON format, in this case prints a string representation of the value.
 Returns:
   - string representing serialized field.
@@ -361,7 +358,7 @@ func (ego *atFloat) serialize() string {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Creates a deep copy of the field, in this case a new float.
 Returns:
   - deep copy of the field.
@@ -371,7 +368,7 @@ func (ego *atFloat) copy() any {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Checks if the content of the field is equal to the given field.
 Returns:
   - true if the fields are equal, false otherwise.
@@ -387,7 +384,7 @@ func (ego *atFloat) isEqual(another any) bool {
 /*
 Structure encapsulating a nil value.
 Implements:
-  - Fielder.
+  - field.
 */
 type atNil struct {
 }
@@ -402,7 +399,7 @@ func newNil() *atNil {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Acquires the value of the field, in this case nil.
 Returns:
   - value of the field.
@@ -412,7 +409,7 @@ func (ego *atNil) getVal() any {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Serializes the field into the JSON format, in this case prints "null".
 Returns:
   - string representing serialized field.
@@ -422,7 +419,7 @@ func (ego *atNil) serialize() string {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Creates a deep copy of the field, in this case a new nil.
 Returns:
   - deep copy of the field.
@@ -432,7 +429,7 @@ func (ego *atNil) copy() any {
 }
 
 /*
-Defined in the Fielder interface.
+Defined in the field interface.
 Checks if the content of the field is equal to the given field.
 Returns:
   - true if the fields are equal, false otherwise.
