@@ -3,15 +3,17 @@
 AnyType is a Go library providing dynamic data structures with JSON support. It contains a number of advanced features with API inspired by Java collections.
 
 It supports following data types compatible with JSON standard:
-- string
-- integer (number)
-- float (number)
-- boolean
+- nil (null)
 - object
 - list (array)
-- nil (null)
+- string
+- boolean
+- integer (number)
+- float (number)
 
-Types can be referenced by the `Type` enum (e.g. `anytype.TypeObject`, `anytype.TypeInt`, ...).
+Types can be referenced by the `Type` enum (e.g. `TypeNil`, `TypeObject`, ...). If the value does not exist, its type is considered `TypeUndefined`. Attempting to access an undefined value will cause a panic.
+
+AnyType also allows usage of so-called "tree form" for accessing values. It is a string using hash for list elements and dot for object fields. For example `#1.a.b#4` or `.d.c#5#0`.
 
 ## Objects
 
@@ -23,22 +25,25 @@ Object is an unordered set of key-value pairs. The default implementation is bas
 ```go
 emptyObject := anytype.NewObject()
 object := anytype.NewObject(
-    "first", 1,
-    "second", 2, 
+    "number", 1,
+    "string", "test",
+    "bool", true,
+    "null", nil,
 )
 ```
 
-- `NewObjectFrom(dict any) Object` - object can be also created from a given Go map. Any map with string as a key and a compatible type as a value can be used,
+- `NewObjectFrom(dict any) Object` - object can be also created from a given Go map. Any map with string for keys and a compatible type (including any) for values can be used,
 ```go
 object := anytype.NewObjectFrom(map[string]int{
-	"first":  1,
+	"first": 1,
 	"second": 2,
+    "third": 3,
 })
 ```
 
 - `ParseObject(json string) (Object, error)` - loads an object from a JSON string,
 ```go
-object, err := anytype.ParseObject(`{"first":1,"second":2}`)
+object, err := anytype.ParseObject(`{"first":1,"second":2,"third":3}`)
 if err != nil {
     // ...
 }
@@ -101,29 +106,29 @@ if object.TypeOf("integer") == anytype.TypeInt {
 ```
 
 ### Export
-- `String() string` - exports the object to a JSON string,
+- `String() string` - exports the object into a JSON string,
 ```go
 fmt.Println(object.String())
 ```
 
-- `FormatString(indent int) string` - exports the object to a well-arranged JSON string with the given indentation, 
+- `FormatString(indent int) string` - exports the object into a well-arranged JSON string with the given indentation, 
 ```go
 fmt.Println(object.FormatString(4))
 ```
 
-- `Dict() map[string]any` - exports the object to a Go map,
+- `Dict() map[string]any` - exports the object into a Go map,
 ```go
 var dict map[string]any
 dict = object.Dict()
 ```
 
-- `Keys() List` - exports all keys of the object to an AnyType list,
+- `Keys() List` - exports all keys of the object into an AnyType list,
 ```go
 var keys anytype.List
 keys = object.Keys()
 ```
 
-- `Values() List` - exports all values of the object to an AnyType list.
+- `Values() List` - exports all values of the object into an AnyType list.
 ```go
 var values anytype.List
 values = object.Values()
@@ -166,7 +171,7 @@ merged := object.Merge(another)
 plucked := object.Pluck("first", "second")
 ```
 
-- `Contains(elem any) bool` - checks whether the object contains a value,
+- `Contains(elem any) bool` - checks whether the object contains a certain value,
 ```go
 if object.Contains(1) {
     // ...
@@ -178,7 +183,7 @@ if object.Contains(1) {
 first := object.KeyOf(1)
 ```
 
-- `KeyExists(key string) bool` - checks whether a key exists in the object.
+- `KeyExists(key string) bool` - checks whether a key exists within the object.
 ```go
 if object.KeyExists("first") {
     // ...
@@ -264,14 +269,14 @@ floats := object.MapFloats(func(float float64) any {
 ```
 
 ### Asynchronous
-- `ForEachAsync(function func(string, any)) Object` - performs the ForEach paralelly,
+- `ForEachAsync(function func(string, any)) Object` - performs the ForEach parallelly,
 ```go
 object.ForEachAsync(func(key string, value any) {
     // ...
 })
 ```
 
-- `MapAsync(function func(string, any) any) Object` - performs the Map paralelly.
+- `MapAsync(function func(string, any) any) Object` - performs the Map parallelly.
 ```go
 mapped := object.MapAsync(func(key string, value any) any {
     // ...
@@ -299,7 +304,7 @@ List is an ordered sequence of elements. The default implementation is based on 
 - `NewList(values ...any) List` - initial list elements could be given as variadic arguments,
 ```go
 emptyList := anytype.NewList()
-list := anytype.NewList(1, 2, 3)
+list := anytype.NewList(1, "test", true, nil)
 ```
 
 - `NewListOf(value any, count int) List` - creates a list of n repeated values,
@@ -309,7 +314,7 @@ list := anytype.NewListOf(nil, 10)
 
 - `NewListFrom(slice any) List` - creates a list from a given Go slice. Any slice of a compatible type (including any) can be used,
 ```go
-list := anytype.NewListOf(nil, 10)
+list := anytype.NewListFrom([]int{1, 2, 3})
 ```
 
 - `ParseList(json string) (List, error)` - loads a list from a JSON string,
@@ -326,7 +331,7 @@ if err != nil {
 list.Add(1, 2, 3)
 ```
 
-- `Insert(index int, value any) List` - inserts new element to a specific position in the list,
+- `Insert(index int, value any) List` - inserts a new element to a specific position in the list,
 ```go
 list.Insert(1, 1.5)
 ```
@@ -336,12 +341,12 @@ list.Insert(1, 1.5)
 list.Replace(1, "2")
 ```
 
-- `Delete(index ...int) List` - deletes specified elements,
+- `Delete(index ...int) List` - removes specified elements,
 ```go
 list.Delete(1, 2)
 ```
 
-- `Pop() List` - Deletes the last element in the list,
+- `Pop() List` - removes the last element from the list,
 ```go
 list.Pop()
 ```
@@ -380,23 +385,23 @@ if list.TypeOf(0) == anytype.TypeInt {
 ```
 
 ### Export
-- `String() string` - exports the list to a JSON string,
+- `String() string` - exports the list into a JSON string,
 ```go
 fmt.Println(list.String())
 ```
 
-- `FormatString(indent int) string` - exports the list to a well-arranged JSON string with the given indentation, 
+- `FormatString(indent int) string` - exports the list into a well-arranged JSON string with the given indentation, 
 ```go
 fmt.Println(list.FormatString(4))
 ```
 
-- `Slice() []any` - exports the list to a Go slice,
+- `Slice() []any` - exports the list into a Go slice,
 ```go
 var slice []any
 slice = list.Slice()
 ```
 
-- export to type-specific slices - panics if the list is not homogeneous,
+- export into type-specific slices - panics if the list is not homogeneous,
 ```go
 var objects []anytype.Object
 objects = list.ObjectSlice()
@@ -418,7 +423,7 @@ floats = list.FloatSlice()
 copy := list.Clone()
 ```
 
-- `Count() int` - returns a number of elements of the list,
+- `Count() int` - returns a number of elements in the list,
 ```go
 for i := 0; i < list.Count(); i++ {
     // ...
@@ -449,7 +454,7 @@ concated := list.Concat(another)
 subList := list.SubList(1, 3)
 ```
 
-- `Contains(elem any) bool` - checks whether the list contains a value,
+- `Contains(elem any) bool` - checks whether the list contains a certain value,
 ```go
 if list.Contains("value") {
     // ...
@@ -472,7 +477,7 @@ list.Reverse()
 ```
 
 ### Checks For Homogeneity
-- `AllNumeric() bool` - checks if all elements are numbers (either ints or floats),
+- `AllNumeric() bool` - checks if all elements are numbers (ints or floats),
 ```go
 if list.AllNumeric() {
     // ...
@@ -577,7 +582,7 @@ floats := list.MapFloats(func(float float64) any {
 ```
 
 ### Reductions
-- `Reduce(initial any, function func(any, any) any) any` - reduces all elements of the list into a single value,
+- `Reduce(initial any, function func(any, any) any) any` - reduces all elements in the list into a single value,
 ```go
 result := list.Reduce(0, func(sum, value any) any {
 	return sum.(int) + value.(int)
@@ -636,7 +641,7 @@ floats := list.FilterFloats(func(value float64) bool {
 sum := list.IntSum()
 ```
 
-- `Sum() float64` - works with both numeric types, returns float,
+- `Sum() float64` - compatible with both numeric types, returns float,
 ```go
 sum := list.Sum()
 ```
@@ -645,12 +650,12 @@ sum := list.Sum()
 product := list.IntProd()
 ```
 
-- `Prod() float64` - works with both numeric types, returns float,
+- `Prod() float64` - compatible with both numeric types, returns float,
 ```go
 product := list.Prod()
 ```
 
-- `Avg() float64` - computes and arithmetic mean of all elements in the list,
+- `Avg() float64` - computes an arithmetic mean of all elements in the list,
 ```go
 average := list.Avg()
 ```
@@ -660,7 +665,7 @@ average := list.Avg()
 minimum := list.IntMin()
 ```
 
-- `Min() float64` - works with both numeric types, returns float,
+- `Min() float64` - compatible with both numeric types, returns float,
 ```go
 minimum := list.Min()
 ```
@@ -670,20 +675,20 @@ minimum := list.Min()
 maximum := list.IntMax()
 ```
 
-- `Max() float64` - works with both numeric types, returns float,
+- `Max() float64` - compatible with both numeric types, returns float,
 ```go
 maximum := list.Max()
 ```
 
 ### Asynchronous
-- `ForEachAsync(function func(int, any)) List` - performs the ForEach paralelly,
+- `ForEachAsync(function func(int, any)) List` - performs the ForEach parallelly,
 ```go
 list.ForEachAsync(func(index int, value any) {
     // ...
 })
 ```
 
-- `MapAsync(function func(int, any) any) List` - performs the Map paralelly.
+- `MapAsync(function func(int, any) any) List` - performs the Map parallelly.
 ```go
 mapped := list.MapAsync(func(index int, value any) any {
     // ...
@@ -703,7 +708,7 @@ list.SetTF("#2.first", 2)
 ```
 
 ## Derived Structures
-AnyType supports inheritance and method overriding by defining custom structures with object or list embedded in them. As Go uses the embedded pointer as receiver instead of the structure itself, the pointer to the derived structure ("ego pointer") has to be stored using the method `Init(ptr Object)`/`Init(ptr List)`. When overriding a method, the ego pointer can be obtained with `Ego() Object`/`Ego() List`.
+AnyType supports inheritance and method overriding by defining custom structures with embedded object or list. As Go uses the embedded pointer as a receiver instead of the embedding structure, the pointer to the derived structure (so-called "ego pointer") has to be stored using the method `Init(ptr Object)`/`Init(ptr List)`. When overriding a method, the ego pointer can be obtained with `Ego() Object`/`Ego() List`.
 
 ```go
 // Embeds an object
@@ -726,7 +731,7 @@ func NewAnimal(name string, age int) *Animal {
 // Method overriding
 func (ego *Animal) Clear() anytype.Object {
 	fmt.Fprintln(os.Stderr, "fields of an animal cannot be cleared")
-	return ego.Ego() // Using stored pointer to return Animal instead of embedded object
+	return ego.Ego() // Using stored pointer to return Animal instead of the embedded object
 }
 
 func (ego *Animal) Breathe() {
@@ -751,7 +756,7 @@ func NewDog(name string, age int, breed string) *Dog {
 // Method overriding
 func (ego *Dog) Unset(keys ...string) anytype.Object {
 	fmt.Fprintln(os.Stderr, "fields of a dog cannot be unset")
-	return ego.Ego() // Using stored pointer to return Dog insted of object
+	return ego.Ego() // Using stored pointer to return Dog instead of object
 }
 
 func (ego *Dog) Bark() {

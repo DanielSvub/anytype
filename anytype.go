@@ -121,7 +121,7 @@ type atString struct {
 }
 
 /*
-Crates a new AnyType string.
+Creates a new AnyType string.
 Parameters:
   - val - value of the string.
 
@@ -135,7 +135,7 @@ func newString(val string) *atString {
 
 /*
 Defined in the field interface.
-Acquires the value of the field, in this case a string value (string is a value type).
+Acquires a value of the field, in this case a string value (string is a value type).
 Returns:
   - value of the field.
 */
@@ -155,7 +155,7 @@ func (ego *atString) copy() any {
 
 /*
 Defined in the field interface.
-Serializes the field into the JSON format, in this case simply prints the value.
+Serializes the field into the JSON format, in this case prints the quoted string.
 Returns:
   - string representing serialized field.
 */
@@ -188,7 +188,7 @@ type atBool struct {
 }
 
 /*
-Crates a new AnyType bool.
+Creates a new AnyType bool.
 Parameters:
   - val - value of the bool.
 
@@ -202,7 +202,7 @@ func newBool(val bool) *atBool {
 
 /*
 Defined in the field interface.
-Acquires the value of the field, in this case a bool value (bool is a value type).
+Acquires a value of the field, in this case a bool value (bool is a value type).
 Returns:
   - value of the field.
 */
@@ -254,7 +254,7 @@ type atInt struct {
 }
 
 /*
-Crates a new AnyType int.
+Creates a new AnyType int.
 Parameters:
   - val - value of the int.
 
@@ -268,7 +268,7 @@ func newInt(val int) *atInt {
 
 /*
 Defined in the field interface.
-Acquires the value of the field, in this case an int value (int is a value type).
+Acquires a value of the field, in this case an int value (int is a value type).
 Returns:
   - value of the field.
 */
@@ -320,7 +320,7 @@ type atFloat struct {
 }
 
 /*
-Crates a new AnyType float.
+Creates a new AnyType float.
 Parameters:
   - val - value of the float.
 
@@ -334,7 +334,7 @@ func newFloat(val float64) *atFloat {
 
 /*
 Defined in the field interface.
-Acquires the value of the field, in this case a float value (float is a value type).
+Acquires a value of the field, in this case a float value (float is a value type).
 Returns:
   - value of the field.
 */
@@ -390,7 +390,7 @@ type atNil struct {
 }
 
 /*
-Crates a new AnyType nil.
+Creates a new AnyType nil.
 Returns:
   - Pointer to the created nil.
 */
@@ -400,7 +400,7 @@ func newNil() *atNil {
 
 /*
 Defined in the field interface.
-Acquires the value of the field, in this case nil.
+Acquires a value of the field, in this case nil.
 Returns:
   - value of the field.
 */

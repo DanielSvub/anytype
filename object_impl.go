@@ -101,7 +101,7 @@ func (ego *object) assert() {
 
 /*
 Defined in the field interface.
-Acquires the value of the field, in this case a reference to the whole struct (Object is reference type).
+Acquires the value of the field, in this case a reference to the whole struct (Object is a reference type).
 
 Returns:
   - value of the field.

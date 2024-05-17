@@ -93,7 +93,7 @@ type List interface {
 	Clear() List
 
 	/*
-		Acquires the element at the specified position in the list.
+		Acquires an element at the specified position in the list.
 
 		Parameters:
 		  - index - position of the element to get.
@@ -104,7 +104,7 @@ type List interface {
 	Get(index int) any
 
 	/*
-		Acquires the object at the specified position in the list.
+		Acquires an object at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -116,7 +116,7 @@ type List interface {
 	GetObject(index int) Object
 
 	/*
-		Acquires the list at the specified position in the list.
+		Acquires a list at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -128,7 +128,7 @@ type List interface {
 	GetList(index int) List
 
 	/*
-		Acquires the string at the specified position in the list.
+		Acquires a string at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -140,7 +140,7 @@ type List interface {
 	GetString(index int) string
 
 	/*
-		Acquires the boolean at the specified position in the list.
+		Acquires a boolean at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -152,7 +152,7 @@ type List interface {
 	GetBool(index int) bool
 
 	/*
-		Acquires the integer at the specified position in the list.
+		Acquires an integer at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -164,7 +164,7 @@ type List interface {
 	GetInt(index int) int
 
 	/*
-		Acquires the float at the specified position in the list.
+		Acquires a float at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -177,6 +177,7 @@ type List interface {
 
 	/*
 		Gives a type of the element at the specified position in the list.
+		If the index is out of range, 0 (TypeUndefined) is returned.
 
 		Parameters:
 		  - index - position of the element.
@@ -206,7 +207,7 @@ type List interface {
 	FormatString(indent int) string
 
 	/*
-		Converts the list into a Go slice of empty interfaces.
+		Converts the list into a Go slice of any.
 
 		Returns:
 		  - slice.
@@ -308,7 +309,7 @@ type List interface {
 		The old list remains unchanged.
 
 		Parameters:
-		  - another - a list to append.
+		  - another - a list to concat.
 
 		Returns:
 		  - new list.
@@ -530,7 +531,7 @@ type List interface {
 	/*
 		Copies the list and modifies each element by a given mapping function.
 		The resulting element can have a different type than the original one.
-		The function has two parameters: current index and value of the current element. Returns empty interface.
+		The function has two parameters: current index and value of the current element. Returns any.
 		The old list remains unchanged.
 
 		Parameters:
@@ -544,7 +545,7 @@ type List interface {
 	/*
 		Copies the list and modifies each element by a given mapping function.
 		The resulting element can have a different type than the original one.
-		The function has one parameter, value of the current element, and returns empty interface.
+		The function has one parameter, value of the current element, and returns any.
 		The old list remains unchanged.
 
 		Parameters:
@@ -557,9 +558,9 @@ type List interface {
 
 	/*
 		Selects all objects from the list and modifies each of them by a given mapping function.
-		Elements with other types are ignored.
+		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.
-		The function has one parameter, the current object, and returns empty interface.
+		The function has one parameter, the current object, and returns any.
 		The old list remains unchanged.
 
 		Parameters:
@@ -572,9 +573,9 @@ type List interface {
 
 	/*
 		Selects all nested lists from the list and modifies each of them by a given mapping function.
-		Elements with other types are ignored.
+		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.
-		The function has one parameter, the current list, and returns empty interface.
+		The function has one parameter, the current list, and returns any.
 		The old list remains unchanged.
 
 		Parameters:
@@ -587,9 +588,9 @@ type List interface {
 
 	/*
 		Selects all strings from the list and modifies each of them by a given mapping function.
-		Elements with other types are ignored.
+		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.
-		The function has one parameter, the current string, and returns empty interface.
+		The function has one parameter, the current string, and returns any.
 		The old list remains unchanged.
 
 		Parameters:
@@ -602,9 +603,9 @@ type List interface {
 
 	/*
 		Selects all ints from the list and modifies each of them by a given mapping function.
-		Elements with other types are ignored.
+		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.
-		The function has one parameter, the current int, and returns empty interface.
+		The function has one parameter, the current int, and returns any.
 		The old list remains unchanged.
 
 		Parameters:
@@ -617,9 +618,9 @@ type List interface {
 
 	/*
 		Selects all floats from the list and modifies each of them by a given mapping function.
-		Elements with other types are ignored.
+		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.
-		The function has one parameter, the current float, and returns empty interface.
+		The function has one parameter, the current float, and returns any.
 		The old list remains unchanged.
 
 		Parameters:
@@ -632,7 +633,7 @@ type List interface {
 
 	/*
 		Reduces all elements of the list into a single value.
-		The function has two parameters: value returned by the previous iteration and value of the current element. Returns empty interface.
+		The function has two parameters: value returned by the previous iteration and value of the current element. Returns any.
 		The list remains unchanged.
 
 		Parameters:
@@ -645,7 +646,7 @@ type List interface {
 
 	/*
 		Reduces all strings in the list into a single string.
-		Elements with other types are ignored.
+		Elements of other types are ignored.
 		The function has two parameters: string returned by the previous iteration and current string. Returns string.
 		The list remains unchanged.
 
@@ -659,7 +660,7 @@ type List interface {
 
 	/*
 		Reduces all ints in the list into a single int.
-		Elements with other types are ignored.
+		Elements of other types are ignored.
 		The function has two parameters: int returned by the previous iteration and current int. Returns int.
 		The list remains unchanged.
 
@@ -673,7 +674,7 @@ type List interface {
 
 	/*
 		Reduces all floats in the list into a single float.
-		Elements with other types are ignored.
+		Elements of other types are ignored.
 		The function has two parameters: float returned by the previous iteration and current float. Returns float.
 		The list remains unchanged.
 
@@ -686,7 +687,7 @@ type List interface {
 	ReduceFloats(initial float64, function func(float64, float64) float64) float64
 
 	/*
-		Creates a new list containing elements of the old one, satisfying a condition.
+		Creates a new list containing elements of the old one satisfying a condition.
 		The function has one parameter, value of the current element, and returns bool.
 		The old list remains unchanged.
 
@@ -699,8 +700,8 @@ type List interface {
 	Filter(function func(any) bool) List
 
 	/*
-		Creates a new list containing objects of the old one, satisfying a condition.
-		Elements with other types are ignored.
+		Creates a new list containing objects of the old one satisfying a condition.
+		Elements of other types are ignored.
 		The function has one parameter, current object, and returns bool.
 		The old list remains unchanged.
 
@@ -713,8 +714,8 @@ type List interface {
 	FilterObjects(function func(Object) bool) List
 
 	/*
-		Creates a new list containing nested lists of the old one, satisfying a condition.
-		Elements with other types are ignored.
+		Creates a new list containing nested lists of the old one satisfying a condition.
+		Elements of other types are ignored.
 		The function has one parameter, current list, and returns bool.
 		The old list remains unchanged.
 
@@ -727,8 +728,8 @@ type List interface {
 	FilterLists(function func(List) bool) List
 
 	/*
-		Creates a new list containing strings of the old one, satisfying a condition.
-		Elements with other types are ignored.
+		Creates a new list containing strings of the old one satisfying a condition.
+		Elements of other types are ignored.
 		The function has one parameter, current string, and returns bool.
 		The old list remains unchanged.
 
@@ -741,8 +742,8 @@ type List interface {
 	FilterStrings(function func(string) bool) List
 
 	/*
-		Creates a new list containing ints of the old one, satisfying a condition.
-		Elements with other types are ignored.
+		Creates a new list containing ints of the old one satisfying a condition.
+		Elements of other types are ignored.
 		The function has one parameter, current int, and returns bool.
 		The old list remains unchanged.
 
@@ -755,8 +756,8 @@ type List interface {
 	FilterInts(function func(int) bool) List
 
 	/*
-		Creates a new list containing floats of the old one, satisfying a condition.
-		Elements with other types are ignored.
+		Creates a new list containing floats of the old one satisfying a condition.
+		Elements of other types are ignored.
 		The function has one parameter, current float, and returns bool.
 		The old list remains unchanged.
 
@@ -770,7 +771,7 @@ type List interface {
 
 	/*
 		Computes a sum of all elements in the list.
-		The list has to be homogeneous and all its elements have to be ints.
+		All elements of the list have to be ints.
 
 		Returns:
 		  - computed sum (int).
@@ -779,7 +780,7 @@ type List interface {
 
 	/*
 		Computes a sum of all elements in the list.
-		The list has to be homogeneous and all its elements have to be numeric.
+		All elements of the list have to be numeric.
 
 		Returns:
 		  - computed sum (float).
@@ -788,7 +789,7 @@ type List interface {
 
 	/*
 		Computes a product of all elements in the list.
-		The list has to be homogeneous and all its elements have to be ints.
+		All elements of the list have to be ints.
 
 		Returns:
 		  - computed product (int).
@@ -797,7 +798,7 @@ type List interface {
 
 	/*
 		Computes a product of all elements in the list.
-		The list has to be homogeneous and all its elements have to be numeric.
+		All elements of the list have to be numeric.
 
 		Returns:
 		  - computed pruduct (float).
@@ -806,7 +807,7 @@ type List interface {
 
 	/*
 		Computes an arithmetic mean of all elements in the list.
-		The list has to be homogeneous and all its elements have to be numeric.
+		All elements of the list have to be numeric.
 
 		Returns:
 		  - computed average value (float).
@@ -815,7 +816,7 @@ type List interface {
 
 	/*
 		Finds a minimum of the list.
-		The list has to be homogeneous and all its elements have to be ints.
+		All elements of the list have to be ints.
 
 		Returns:
 		  - found minimum (int).
@@ -824,7 +825,7 @@ type List interface {
 
 	/*
 		Finds a minimum of the list.
-		The list has to be homogeneous and all its elements have to be numeric.
+		All elements of the list have to be numeric.
 
 		Returns:
 		  - found minimum (float).
@@ -833,7 +834,7 @@ type List interface {
 
 	/*
 		Finds a maximum of the list.
-		The list has to be homogeneous and all its elements have to be ints.
+		All elements of the list have to be ints.
 
 		Returns:
 		  - found maximum (int).
@@ -842,7 +843,7 @@ type List interface {
 
 	/*
 		Finds a maximum of the list.
-		The list has to be homogeneous and all its elements have to be numeric.
+		All elements of the list have to be numeric.
 
 		Returns:
 		  - found maximum (float).
@@ -877,7 +878,7 @@ type List interface {
 	MapAsync(function func(int, any) any) List
 
 	/*
-		Acquires the element specified by the given tree form.
+		Acquires a value specified by a given tree form.
 
 		Parameters:
 		  - tf - tree form string.
@@ -888,7 +889,7 @@ type List interface {
 	GetTF(tf string) any
 
 	/*
-		Sets the element specified by the given tree form.
+		Sets a value specified by a given tree form.
 
 		Parameters:
 		  - tf - tree form string,

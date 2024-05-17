@@ -31,7 +31,7 @@ type Object interface {
 	Ego() Object
 
 	/*
-		Sets a values of the fields.
+		Sets values of the fields.
 		If the key already exists, the value is overwritten, if not, new field is created.
 		If one key is given multiple times, the value is set to the last provided value.
 
@@ -44,7 +44,7 @@ type Object interface {
 	Set(values ...any) Object
 
 	/*
-		Deletes the fields with given keys.
+		Deletes the fields with the given keys.
 
 		Parameters:
 		  - keys... - any amount of keys to delete.
@@ -55,7 +55,7 @@ type Object interface {
 	Unset(keys ...string) Object
 
 	/*
-		Deletes all field of the object.
+		Deletes all fields in the object.
 
 		Returns:
 		  - updated object.
@@ -63,7 +63,7 @@ type Object interface {
 	Clear() Object
 
 	/*
-		Acquires the value under the specified key of the object.
+		Acquires a value under the specified key of the object.
 
 		Parameters:
 		  - key - key of the field to get.
@@ -74,7 +74,7 @@ type Object interface {
 	Get(key string) any
 
 	/*
-		Acquires the nested object under the specified key of the object.
+		Acquires a nested object under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -86,7 +86,7 @@ type Object interface {
 	GetObject(key string) Object
 
 	/*
-		Acquires the list under the specified key of the object.
+		Acquires a list under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -98,7 +98,7 @@ type Object interface {
 	GetList(key string) List
 
 	/*
-		Acquires the string under the specified key of the object.
+		Acquires a string under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -110,7 +110,7 @@ type Object interface {
 	GetString(key string) string
 
 	/*
-		Acquires the bool under the specified key of the object.
+		Acquires a bool under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -122,7 +122,7 @@ type Object interface {
 	GetBool(key string) bool
 
 	/*
-		Acquires the int under the specified key of the object.
+		Acquires an int under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -134,7 +134,7 @@ type Object interface {
 	GetInt(key string) int
 
 	/*
-		Acquires the float under the specified key of the object.
+		Acquires a float under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -147,6 +147,7 @@ type Object interface {
 
 	/*
 		Gives a type of the field under the specified key of the object.
+		If the key does not exist, 0 (TypeUndefined) is returned.
 
 		Parameters:
 		  - key - key of the field.
@@ -238,7 +239,7 @@ type Object interface {
 	/*
 		Creates a new object containing all elements of the old object and another object.
 		The old object remains unchanged.
-		If both objects contain a key, the value from another object is used.
+		If both objects contain the same key, the value from another object is used.
 
 		Parameters:
 		  - another - an object to merge.
@@ -250,12 +251,13 @@ type Object interface {
 
 	/*
 		Creates a new object containing the given fields of the existing object.
+		The old object remains unchanged.
 
 		Parameters:
 		  - keys... - any amount of keys to be in the new object.
 
 		Returns:
-		  - created plucked object.
+		  - new object.
 	*/
 	Pluck(keys ...string) Object
 
@@ -320,7 +322,7 @@ type Object interface {
 
 	/*
 		Executes a given function over all objects nested in the object.
-		Fields with other types are ignored.
+		Fields of other types are ignored.
 		The function has one parameter, the current object.
 
 		Parameters:
@@ -333,7 +335,7 @@ type Object interface {
 
 	/*
 		Executes a given function over all lists in the object.
-		Fields with other types are ignored.
+		Fields of other types are ignored.
 		The function has one parameter, the current list.
 
 		Parameters:
@@ -346,7 +348,7 @@ type Object interface {
 
 	/*
 		Executes a given function over all strings in the object.
-		Fields with other types are ignored.
+		Fields of other types are ignored.
 		The function has one parameter, the current string.
 
 		Parameters:
@@ -359,7 +361,7 @@ type Object interface {
 
 	/*
 		Executes a given function over all bools in the object.
-		Fields with other types are ignored.
+		Fields of other types are ignored.
 		The function has one parameter, the current bool.
 
 		Parameters:
@@ -372,7 +374,7 @@ type Object interface {
 
 	/*
 		Executes a given function over all ints in the object.
-		Fields with other types are ignored.
+		Fields of other types are ignored.
 		The function has one parameter, the current int.
 
 		Parameters:
@@ -385,7 +387,7 @@ type Object interface {
 
 	/*
 		Executes a given function over all floats in the object.
-		Fields with other types are ignored.
+		Fields of other types are ignored.
 		The function has one parameter, the current float.
 
 		Parameters:
@@ -399,8 +401,8 @@ type Object interface {
 	/*
 		Copies the object and modifies each field by a given mapping function.
 		The resulting field can have a different type than the original one.
-		The function has two parameters: current key and value of the current element. Returns empty interface.
-		The old list remains unchanged.
+		The function has two parameters: current key and value of the current element. Returns any.
+		The old object remains unchanged.
 
 		Parameters:
 		  - function - anonymous function to be executed.
@@ -413,8 +415,8 @@ type Object interface {
 	/*
 		Copies the object and modifies each field by a given mapping function.
 		The resulting field can have a different type than the original one.
-		The function has one parameter, value of the current field, and returns empty interface.
-		The old list remains unchanged.
+		The function has one parameter, value of the current field, and returns any.
+		The old object remains unchanged.
 
 		Parameters:
 		  - function - anonymous function to be executed.
@@ -425,10 +427,10 @@ type Object interface {
 	MapValues(function func(any) any) Object
 
 	/*
-		Selects all nested objects of the object and modifies each of them by a given mapping function.
+		Selects all nested objects in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.
-		The function has one parameter, the current object, and returns empty interface.
+		The function has one parameter, the current object, and returns any.
 		The old object remains unchanged.
 
 		Parameters:
@@ -440,10 +442,10 @@ type Object interface {
 	MapObjects(function func(Object) any) Object
 
 	/*
-		Selects all lists of the object and modifies each of them by a given mapping function.
+		Selects all lists in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.
-		The function has one parameter, the current list, and returns empty interface.
+		The function has one parameter, the current list, and returns any.
 		The old object remains unchanged.
 
 		Parameters:
@@ -455,7 +457,7 @@ type Object interface {
 	MapLists(function func(List) any) Object
 
 	/*
-		Selects all nested strings of the object and modifies each of them by a given mapping function.
+		Selects all strings in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.
 		The function has one parameter, the current string, and returns empty interface.
@@ -470,7 +472,7 @@ type Object interface {
 	MapStrings(function func(string) any) Object
 
 	/*
-		Selects all nested ints of the object and modifies each of them by a given mapping function.
+		Selects all ints in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.
 		The function has one parameter, the current int, and returns empty interface.
@@ -485,7 +487,7 @@ type Object interface {
 	MapInts(function func(int) any) Object
 
 	/*
-		Selects all nested floats of the object and modifies each of them by a given mapping function.
+		Selects all floats in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.
 		The function has one parameter, the current float, and returns empty interface.
@@ -527,7 +529,7 @@ type Object interface {
 	MapAsync(function func(string, any) any) Object
 
 	/*
-		Acquires the element specified by the given tree form.
+		Acquires a value specified by a given tree form.
 
 		Parameters:
 		  - tf - tree form string.
@@ -538,7 +540,7 @@ type Object interface {
 	GetTF(tf string) any
 
 	/*
-		Sets the element specified by the given tree form.
+		Sets a value specified by a given tree form.
 
 		Parameters:
 		  - tf - tree form string,

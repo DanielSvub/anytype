@@ -18,7 +18,7 @@ import (
 )
 
 /*
-Slice list, a reference type. Contains a slice of elements.
+Slice list, a reference type. Contains a slice.
 
 Implements:
   - field,
@@ -125,7 +125,7 @@ func (ego *list) assert() {
 
 /*
 Defined in the field interface.
-Acquires the value of the field, in this case a reference to the whole struct (List is reference type).
+Acquires the value of the field, in this case a reference to the whole struct (List is a reference type).
 
 Returns:
   - value of the field.
