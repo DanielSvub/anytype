@@ -184,8 +184,8 @@ func (ego *object) Set(values ...any) Object {
 	}
 	for i := 0; i < length; i += 2 {
 		name, ok := values[i].(string)
-		if !ok || name == "" {
-			panic("object key has to be a non-empty string")
+		if !ok {
+			panic("object key has to be string")
 		}
 		ego.val[name] = parseVal(values[i+1])
 	}
@@ -224,7 +224,7 @@ func (ego *object) Get(key string) any {
 }
 
 func (ego *object) GetObject(key string) Object {
-	o, ok := ego.Get(key).(*object)
+	o, ok := ego.Get(key).(Object)
 	if !ok {
 		panic("field is not an object")
 	}
@@ -232,7 +232,7 @@ func (ego *object) GetObject(key string) Object {
 }
 
 func (ego *object) GetList(key string) List {
-	o, ok := ego.Get(key).(*list)
+	o, ok := ego.Get(key).(List)
 	if !ok {
 		panic("field is not a list")
 	}
@@ -403,7 +403,7 @@ func (ego *object) KeyOf(value any) string {
 			}
 		}
 	}
-	return ""
+	panic(fmt.Sprintf("object does not contain value %v", value))
 }
 
 func (ego *object) KeyExists(key string) bool {

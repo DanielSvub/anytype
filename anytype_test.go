@@ -46,9 +46,6 @@ func TestObject(t *testing.T) {
 		if o.KeyOf(2) != "second" {
 			t.Error("Key for value 2 should be 'second'.")
 		}
-		if o.KeyOf(4) != "" {
-			t.Error("KeyOf should return empty string if element is not present.")
-		}
 		if o.Equals(Object()) {
 			t.Error("Object should not be equal to empty object.")
 		}
