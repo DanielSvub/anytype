@@ -17,7 +17,7 @@ AnyType also allows usage of so-called "tree form" for accessing values. It is a
 
 ## Objects
 
-Object is an unordered set of key-value pairs. The default implementation is based on built-in Go maps. It is possible to make custom implementations by implementing the `Object` interface.
+Object is an unordered set of key-value pairs, the keys are of type string. The default implementation is based on built-in Go maps. It is possible to make custom implementations by implementing the `Object` interface.
 
 ### Constructors
 
@@ -178,7 +178,7 @@ if object.Contains(1) {
 }
 ```
 
-- `KeyOf(elem any) string` - returns any key containing the given value,
+- `KeyOf(elem any) string` - returns any key containing the given value. It panics if the object does not contain the value,
 ```go
 first := object.KeyOf(1)
 ```

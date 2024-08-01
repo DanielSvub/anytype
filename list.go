@@ -6,7 +6,7 @@ List (array) type
 package anytype
 
 /*
-Interface for a list.
+List, an ordered sequence of elements.
 
 Extends:
   - field.

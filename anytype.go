@@ -107,7 +107,7 @@ func parseVal(val any) field {
 	case nil:
 		return newNil()
 	default:
-		panic("unknown type")
+		panic("incompatible type")
 	}
 }
 

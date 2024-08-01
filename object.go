@@ -6,7 +6,7 @@ Object (dictionary) type
 package anytype
 
 /*
-Interface for an object.
+Object, an unordered set of key-value pairs.
 
 Extends:
   - field.
