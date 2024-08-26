@@ -196,9 +196,6 @@ func (ego *object) Set(values ...any) Object {
 func (ego *object) Unset(keys ...string) Object {
 	ego.assert()
 	for _, key := range keys {
-		if ego.val[key] == nil {
-			panic(fmt.Sprintf("object does not have a field '%s'", key))
-		}
 		delete(ego.val, key)
 	}
 	return ego.ptr

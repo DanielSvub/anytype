@@ -44,7 +44,7 @@ type Object interface {
 	Set(values ...any) Object
 
 	/*
-		Deletes the fields with the given keys.
+		Deletes the fields with the given keys. If the key does not exist, nothing happens.
 
 		Parameters:
 		  - keys... - any amount of keys to delete.
