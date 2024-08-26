@@ -74,7 +74,7 @@ func parseList(json string, line *int) (List, int, error) {
 
 	state := stateStart
 	var list List
-	var val string
+	var val strings.Builder
 	var inVal bool
 
 	var char rune
@@ -143,13 +143,13 @@ func parseList(json string, line *int) (List, int, error) {
 
 			// End of the element
 			if char == ',' || char == ']' {
-				if len(val) > 0 {
-					field, err := parseField(val, *line)
+				if val.Len() > 0 {
+					field, err := parseField(val.String(), *line)
 					if err != nil {
 						return nil, 0, err
 					}
 					list.Add(field)
-					val = ""
+					val.Reset()
 					inVal = false
 				}
 				if char == ']' {
@@ -159,7 +159,7 @@ func parseList(json string, line *int) (List, int, error) {
 			}
 
 			// Inside the element
-			val += string(char)
+			val.WriteRune(char)
 			inVal = true
 
 		// Parsing a string
@@ -169,20 +169,21 @@ func parseList(json string, line *int) (List, int, error) {
 				continue
 			}
 			if char == '"' {
-				str, err := strconv.Unquote(fmt.Sprintf(`"%s"`, val))
+				str, err := strconv.Unquote(fmt.Sprintf(`"%s"`, val.String()))
 				if err != nil {
 					return nil, 0, err
 				}
 				list.Add(str)
-				val = ""
+				val.Reset()
 				state = stateValAfterString
 				continue
 			}
-			val += string(char)
+			val.WriteRune(char)
 
 		// Escaping inside string
 		case stateValEscape:
-			val += "\\" + string(char)
+			val.WriteRune('\\')
+			val.WriteRune(char)
 			state = stateValString
 
 		// End of the string
@@ -217,8 +218,8 @@ func parseObject(json string, line *int) (Object, int, error) {
 
 	state := stateStart
 	var object Object
-	var key string
-	var val string
+	var key strings.Builder
+	var val strings.Builder
 	var inVal bool
 
 	var char rune
@@ -255,7 +256,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 				return object, i, nil
 			}
 			if char == '"' {
-				key = ""
+				key.Reset()
 				state = stateKey
 				continue
 			}
@@ -268,12 +269,13 @@ func parseObject(json string, line *int) (Object, int, error) {
 			} else if char == '\\' {
 				state = stateKeyEscape
 			} else {
-				key += string(char)
+				key.WriteRune(char)
 			}
 
 		// Escaping inside key
 		case stateKeyEscape:
-			key += "\\" + string(char)
+			key.WriteRune('\\')
+			key.WriteRune(char)
 			state = stateKey
 
 		// Waiting for colon
@@ -284,12 +286,13 @@ func parseObject(json string, line *int) (Object, int, error) {
 			if char != ':' {
 				return nil, 0, fmt.Errorf("not a valid JSON - expecting ':', got '%s' on line %d", string(char), *line)
 			}
-			var err error
-			key, err = strconv.Unquote(fmt.Sprintf(`"%s"`, key))
+			str, err := strconv.Unquote(fmt.Sprintf(`"%s"`, key.String()))
 			if err != nil {
 				return nil, 0, err
 			}
-			val = ""
+			key.Reset()
+			key.WriteString(str)
+			val.Reset()
 			state = stateVal
 			inVal = false
 
@@ -316,7 +319,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 					return nil, 0, err
 				}
 				i += pos
-				object.Set(key, o)
+				object.Set(key.String(), o)
 				state = stateAfterVal
 				continue
 			}
@@ -328,19 +331,19 @@ func parseObject(json string, line *int) (Object, int, error) {
 					return nil, 0, err
 				}
 				i += pos
-				object.Set(key, l)
+				object.Set(key.String(), l)
 				state = stateAfterVal
 				continue
 			}
 
 			// End of the value
 			if char == ',' || char == '}' {
-				if len(val) > 0 {
-					field, err := parseField(val, *line)
+				if val.Len() > 0 {
+					field, err := parseField(val.String(), *line)
 					if err != nil {
 						return nil, 0, err
 					}
-					object.Set(key, field)
+					object.Set(key.String(), field)
 				}
 				if char == ',' {
 					state = stateKeyStart
@@ -351,7 +354,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 			}
 
 			// Inside the value
-			val += string(char)
+			val.WriteRune(char)
 			inVal = true
 
 		// After nested object or list
@@ -371,7 +374,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 			}
 
 			if char == '"' {
-				key = ""
+				key.Reset()
 				state = stateKey
 				continue
 			}
@@ -385,19 +388,20 @@ func parseObject(json string, line *int) (Object, int, error) {
 				continue
 			}
 			if char == '"' {
-				str, err := strconv.Unquote(fmt.Sprintf(`"%s"`, val))
+				str, err := strconv.Unquote(fmt.Sprintf(`"%s"`, val.String()))
 				if err != nil {
 					return nil, 0, err
 				}
-				object.Set(key, str)
+				object.Set(key.String(), str)
 				state = stateValAfterString
 				continue
 			}
-			val += string(char)
+			val.WriteRune(char)
 
 		// Escaping inside string
 		case stateValEscape:
-			val += "\\" + string(char)
+			val.WriteRune('\\')
+			val.WriteRune(char)
 			state = stateValString
 
 		// End of the string

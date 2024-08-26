@@ -135,16 +135,17 @@ Returns:
   - string representing serialized field.
 */
 func (ego *object) serialize() string {
-	result := "{"
+	var result strings.Builder
+	result.WriteRune('{')
 	i := 0
 	for field, value := range ego.val {
-		result += fmt.Sprintf("%s:%s", strconv.Quote(field), value.serialize())
+		result.WriteString(fmt.Sprintf("%s:%s", strconv.Quote(field), value.serialize()))
 		if i++; i < len(ego.val) {
-			result += ","
+			result.WriteRune(',')
 		}
 	}
-	result += "}"
-	return result
+	result.WriteRune('}')
+	return result.String()
 }
 
 /*

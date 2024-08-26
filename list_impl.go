@@ -159,15 +159,16 @@ Returns:
   - string representing serialized field.
 */
 func (ego *list) serialize() string {
-	result := "["
+	var result strings.Builder
+	result.WriteRune('[')
 	for i, value := range ego.val {
-		result += value.serialize()
+		result.WriteString(value.serialize())
 		if i+1 < len(ego.val) {
-			result += ","
+			result.WriteRune(',')
 		}
 	}
-	result += "]"
-	return result
+	result.WriteRune(']')
+	return result.String()
 }
 
 /*
