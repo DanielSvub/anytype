@@ -306,7 +306,7 @@ type Object interface {
 		Returns:
 		  - unchanged object.
 	*/
-	ForEach(function func(string, any)) Object
+	ForEach(function func(key string, val any)) Object
 
 	/*
 		Executes a given function over an every field of the object.
@@ -318,7 +318,7 @@ type Object interface {
 		Returns:
 		  - unchanged object.
 	*/
-	ForEachValue(function func(any)) Object
+	ForEachValue(function func(x any)) Object
 
 	/*
 		Executes a given function over all objects nested in the object.
@@ -331,7 +331,7 @@ type Object interface {
 		Returns:
 		  - unchanged object.
 	*/
-	ForEachObject(function func(Object)) Object
+	ForEachObject(function func(x Object)) Object
 
 	/*
 		Executes a given function over all lists in the object.
@@ -344,7 +344,7 @@ type Object interface {
 		Returns:
 		  - unchanged object.
 	*/
-	ForEachList(function func(List)) Object
+	ForEachList(function func(x List)) Object
 
 	/*
 		Executes a given function over all strings in the object.
@@ -357,7 +357,7 @@ type Object interface {
 		Returns:
 		  - unchanged object.
 	*/
-	ForEachString(function func(string)) Object
+	ForEachString(function func(x string)) Object
 
 	/*
 		Executes a given function over all bools in the object.
@@ -370,7 +370,7 @@ type Object interface {
 		Returns:
 		  - unchanged object.
 	*/
-	ForEachBool(function func(bool)) Object
+	ForEachBool(function func(x bool)) Object
 
 	/*
 		Executes a given function over all ints in the object.
@@ -383,7 +383,7 @@ type Object interface {
 		Returns:
 		  - unchanged object.
 	*/
-	ForEachInt(function func(int)) Object
+	ForEachInt(function func(x int)) Object
 
 	/*
 		Executes a given function over all floats in the object.
@@ -396,7 +396,7 @@ type Object interface {
 		Returns:
 		  - unchanged object.
 	*/
-	ForEachFloat(function func(float64)) Object
+	ForEachFloat(function func(x float64)) Object
 
 	/*
 		Copies the object and modifies each field by a given mapping function.
@@ -410,7 +410,7 @@ type Object interface {
 		Returns:
 		  - new list.
 	*/
-	Map(function func(string, any) any) Object
+	Map(function func(key string, val any) any) Object
 
 	/*
 		Copies the object and modifies each field by a given mapping function.
@@ -424,7 +424,7 @@ type Object interface {
 		Returns:
 		  - new object.
 	*/
-	MapValues(function func(any) any) Object
+	MapValues(function func(x any) any) Object
 
 	/*
 		Selects all nested objects in the object and modifies each of them by a given mapping function.
@@ -439,7 +439,7 @@ type Object interface {
 		Returns:
 		  - new object.
 	*/
-	MapObjects(function func(Object) any) Object
+	MapObjects(function func(x Object) any) Object
 
 	/*
 		Selects all lists in the object and modifies each of them by a given mapping function.
@@ -454,7 +454,7 @@ type Object interface {
 		Returns:
 		  - new object.
 	*/
-	MapLists(function func(List) any) Object
+	MapLists(function func(x List) any) Object
 
 	/*
 		Selects all strings in the object and modifies each of them by a given mapping function.
@@ -469,7 +469,7 @@ type Object interface {
 		Returns:
 		  - new object.
 	*/
-	MapStrings(function func(string) any) Object
+	MapStrings(function func(x string) any) Object
 
 	/*
 		Selects all ints in the object and modifies each of them by a given mapping function.
@@ -484,7 +484,7 @@ type Object interface {
 		Returns:
 		  - new object.
 	*/
-	MapInts(function func(int) any) Object
+	MapInts(function func(x int) any) Object
 
 	/*
 		Selects all floats in the object and modifies each of them by a given mapping function.
@@ -499,7 +499,7 @@ type Object interface {
 		Returns:
 		  - new object.
 	*/
-	MapFloats(function func(float64) any) Object
+	MapFloats(function func(x float64) any) Object
 
 	/*
 		Parallelly executes a given function over an every field of the object.
@@ -512,7 +512,7 @@ type Object interface {
 		Returns:
 		  - unchanged object.
 	*/
-	ForEachAsync(function func(string, any)) Object
+	ForEachAsync(function func(key string, val any)) Object
 
 	/*
 		Copies the object and paralelly modifies each field by a given mapping function.
@@ -526,7 +526,7 @@ type Object interface {
 		Returns:
 		  - new object.
 	*/
-	MapAsync(function func(string, any) any) Object
+	MapAsync(function func(key string, val any) any) Object
 
 	/*
 		Acquires a value specified by a given tree form.

@@ -436,7 +436,7 @@ type List interface {
 		Returns:
 		  - unchanged list.
 	*/
-	ForEach(function func(int, any)) List
+	ForEach(function func(i int, val any)) List
 
 	/*
 		Executes a given function over an every element of the list.
@@ -448,7 +448,7 @@ type List interface {
 		Returns:
 		  - unchanged list.
 	*/
-	ForEachValue(function func(any)) List
+	ForEachValue(function func(x any)) List
 
 	/*
 		Executes a given function over all objects in the list.
@@ -461,7 +461,7 @@ type List interface {
 		Returns:
 		  - unchanged list.
 	*/
-	ForEachObject(function func(Object)) List
+	ForEachObject(function func(x Object)) List
 
 	/*
 		Executes a given function over all lists nested in the list.
@@ -474,7 +474,7 @@ type List interface {
 		Returns:
 		  - unchanged list.
 	*/
-	ForEachList(function func(List)) List
+	ForEachList(function func(x List)) List
 
 	/*
 		Executes a given function over all strings in the list.
@@ -487,7 +487,7 @@ type List interface {
 		Returns:
 		  - unchanged list.
 	*/
-	ForEachString(function func(string)) List
+	ForEachString(function func(x string)) List
 
 	/*
 		Executes a given function over all bools in the list.
@@ -500,7 +500,7 @@ type List interface {
 		Returns:
 		  - unchanged list.
 	*/
-	ForEachBool(function func(bool)) List
+	ForEachBool(function func(x bool)) List
 
 	/*
 		Executes a given function over all ints in the list.
@@ -513,7 +513,7 @@ type List interface {
 		Returns:
 		  - unchanged list.
 	*/
-	ForEachInt(function func(int)) List
+	ForEachInt(function func(x int)) List
 
 	/*
 		Executes a given function over all floats in the list.
@@ -526,7 +526,7 @@ type List interface {
 		Returns:
 		  - unchanged list.
 	*/
-	ForEachFloat(function func(float64)) List
+	ForEachFloat(function func(x float64)) List
 
 	/*
 		Copies the list and modifies each element by a given mapping function.
@@ -540,7 +540,7 @@ type List interface {
 		Returns:
 		  - new list.
 	*/
-	Map(function func(int, any) any) List
+	Map(function func(i int, val any) any) List
 
 	/*
 		Copies the list and modifies each element by a given mapping function.
@@ -554,7 +554,7 @@ type List interface {
 		Returns:
 		  - new list.
 	*/
-	MapValues(function func(any) any) List
+	MapValues(function func(x any) any) List
 
 	/*
 		Selects all objects from the list and modifies each of them by a given mapping function.
@@ -569,7 +569,7 @@ type List interface {
 		Returns:
 		  - new list.
 	*/
-	MapObjects(function func(Object) any) List
+	MapObjects(function func(x Object) any) List
 
 	/*
 		Selects all nested lists from the list and modifies each of them by a given mapping function.
@@ -584,7 +584,7 @@ type List interface {
 		Returns:
 		  - new list.
 	*/
-	MapLists(function func(List) any) List
+	MapLists(function func(x List) any) List
 
 	/*
 		Selects all strings from the list and modifies each of them by a given mapping function.
@@ -599,7 +599,7 @@ type List interface {
 		Returns:
 		  - new list.
 	*/
-	MapStrings(function func(string) any) List
+	MapStrings(function func(x string) any) List
 
 	/*
 		Selects all ints from the list and modifies each of them by a given mapping function.
@@ -614,7 +614,7 @@ type List interface {
 		Returns:
 		  - new list.
 	*/
-	MapInts(function func(int) any) List
+	MapInts(function func(x int) any) List
 
 	/*
 		Selects all floats from the list and modifies each of them by a given mapping function.
@@ -629,7 +629,7 @@ type List interface {
 		Returns:
 		  - new list.
 	*/
-	MapFloats(function func(float64) any) List
+	MapFloats(function func(x float64) any) List
 
 	/*
 		Reduces all elements of the list into a single value.
@@ -642,7 +642,7 @@ type List interface {
 		Returns:
 		  - computed value.
 	*/
-	Reduce(initial any, function func(any, any) any) any
+	Reduce(initial any, function func(acc any, val any) any) any
 
 	/*
 		Reduces all strings in the list into a single string.
@@ -656,7 +656,7 @@ type List interface {
 		Returns:
 		  - computed value.
 	*/
-	ReduceStrings(initial string, function func(string, string) string) string
+	ReduceStrings(initial string, function func(acc string, val string) string) string
 
 	/*
 		Reduces all ints in the list into a single int.
@@ -670,7 +670,7 @@ type List interface {
 		Returns:
 		  - computed value.
 	*/
-	ReduceInts(initial int, function func(int, int) int) int
+	ReduceInts(initial int, function func(acc int, val int) int) int
 
 	/*
 		Reduces all floats in the list into a single float.
@@ -684,7 +684,7 @@ type List interface {
 		Returns:
 		  - computed value.
 	*/
-	ReduceFloats(initial float64, function func(float64, float64) float64) float64
+	ReduceFloats(initial float64, function func(acc float64, val float64) float64) float64
 
 	/*
 		Creates a new list containing elements of the old one satisfying a condition.
@@ -697,7 +697,7 @@ type List interface {
 		Returns:
 		  - filtered list.
 	*/
-	Filter(function func(any) bool) List
+	Filter(function func(x any) bool) List
 
 	/*
 		Creates a new list containing objects of the old one satisfying a condition.
@@ -711,7 +711,7 @@ type List interface {
 		Returns:
 		  - filtered list.
 	*/
-	FilterObjects(function func(Object) bool) List
+	FilterObjects(function func(x Object) bool) List
 
 	/*
 		Creates a new list containing nested lists of the old one satisfying a condition.
@@ -725,7 +725,7 @@ type List interface {
 		Returns:
 		  - filtered list.
 	*/
-	FilterLists(function func(List) bool) List
+	FilterLists(function func(x List) bool) List
 
 	/*
 		Creates a new list containing strings of the old one satisfying a condition.
@@ -739,7 +739,7 @@ type List interface {
 		Returns:
 		  - filtered list.
 	*/
-	FilterStrings(function func(string) bool) List
+	FilterStrings(function func(x string) bool) List
 
 	/*
 		Creates a new list containing ints of the old one satisfying a condition.
@@ -753,7 +753,7 @@ type List interface {
 		Returns:
 		  - filtered list.
 	*/
-	FilterInts(function func(int) bool) List
+	FilterInts(function func(x int) bool) List
 
 	/*
 		Creates a new list containing floats of the old one satisfying a condition.
@@ -767,7 +767,7 @@ type List interface {
 		Returns:
 		  - filtered list.
 	*/
-	FilterFloats(function func(float64) bool) List
+	FilterFloats(function func(x float64) bool) List
 
 	/*
 		Computes a sum of all elements in the list.
@@ -861,7 +861,7 @@ type List interface {
 		Returns:
 		  - unchanged list.
 	*/
-	ForEachAsync(function func(int, any)) List
+	ForEachAsync(function func(i int, val any)) List
 
 	/*
 		Copies the list and paralelly modifies each element by a given mapping function.
@@ -875,7 +875,7 @@ type List interface {
 		Returns:
 		  - new list.
 	*/
-	MapAsync(function func(int, any) any) List
+	MapAsync(function func(i int, val any) any) List
 
 	/*
 		Acquires a value specified by a given tree form.
