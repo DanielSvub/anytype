@@ -84,7 +84,7 @@ func parseList(json string, line *int) (List, int, error) {
 	for i := 0; i < len(json); i += size {
 
 		char, size = utf8.DecodeRuneInString(json[i:])
-		if size == 0 {
+		if size == 0 || char == utf8.RuneError {
 			return nil, 0, fmt.Errorf("not an UTF-8 encoding")
 		}
 
@@ -96,9 +96,6 @@ func parseList(json string, line *int) (List, int, error) {
 
 		// List creation
 		case stateStart:
-			if char != '[' {
-				return nil, 0, fmt.Errorf("not a valid JSON - expecting '[', got '%s' on line %d", string(char), *line)
-			}
 			list = NewList()
 			state = stateVal
 			inVal = false
@@ -169,10 +166,7 @@ func parseList(json string, line *int) (List, int, error) {
 				continue
 			}
 			if char == '"' {
-				str, err := strconv.Unquote(fmt.Sprintf(`"%s"`, val.String()))
-				if err != nil {
-					return nil, 0, err
-				}
+				str, _ := strconv.Unquote(fmt.Sprintf(`"%s"`, val.String()))
 				list.Add(str)
 				val.Reset()
 				state = stateValAfterString
@@ -229,7 +223,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 	for i := 0; i < len(json); i += size {
 
 		char, size = utf8.DecodeRuneInString(json[i:])
-		if size == 0 {
+		if size == 0 || char == utf8.RuneError {
 			return nil, 0, fmt.Errorf("not an UTF-8 encoding")
 		}
 
@@ -241,9 +235,6 @@ func parseObject(json string, line *int) (Object, int, error) {
 
 		// Object creation
 		case stateStart:
-			if char != '{' {
-				return nil, 0, fmt.Errorf("not a valid JSON - expecting '{', got '%s' on line %d", string(char), *line)
-			}
 			object = NewObject()
 			state = stateKeyStart
 
@@ -286,10 +277,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 			if char != ':' {
 				return nil, 0, fmt.Errorf("not a valid JSON - expecting ':', got '%s' on line %d", string(char), *line)
 			}
-			str, err := strconv.Unquote(fmt.Sprintf(`"%s"`, key.String()))
-			if err != nil {
-				return nil, 0, err
-			}
+			str, _ := strconv.Unquote(fmt.Sprintf(`"%s"`, key.String()))
 			key.Reset()
 			key.WriteString(str)
 			val.Reset()
@@ -388,10 +376,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 				continue
 			}
 			if char == '"' {
-				str, err := strconv.Unquote(fmt.Sprintf(`"%s"`, val.String()))
-				if err != nil {
-					return nil, 0, err
-				}
+				str, _ := strconv.Unquote(fmt.Sprintf(`"%s"`, val.String()))
 				object.Set(key.String(), str)
 				state = stateValAfterString
 				continue

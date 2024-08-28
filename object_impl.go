@@ -37,8 +37,8 @@ Returns:
   - pointer to the created object.
 */
 func NewObject(values ...any) Object {
-	ego := &object{val: make(map[string]field)}
-	ego.ptr = ego
+	ego := &object{val: map[string]field{}}
+	ego.Init(ego)
 	ego.Set(values...)
 	return ego
 }
@@ -91,15 +91,6 @@ func NewObjectFrom(dict any) Object {
 }
 
 /*
-Asserts that the object is initialized.
-*/
-func (ego *object) assert() {
-	if ego == nil || ego.val == nil {
-		panic("object is not initialized")
-	}
-}
-
-/*
 Defined in the field interface.
 Acquires the value of the field, in this case a reference to the whole struct (Object is a reference type).
 
@@ -107,7 +98,7 @@ Returns:
   - value of the field.
 */
 func (ego *object) getVal() any {
-	return ego.ptr
+	return ego.Ego()
 }
 
 /*
@@ -158,7 +149,7 @@ Returns:
 */
 func (ego *object) isEqual(another any) bool {
 	obj, ok := another.(*object)
-	if !ok || ego.Count() != obj.Count() {
+	if !ok || ego.Ego().Count() != obj.Count() {
 		return false
 	}
 	for k := range ego.val {
@@ -178,9 +169,8 @@ func (ego *object) Ego() Object {
 }
 
 func (ego *object) Set(values ...any) Object {
-	ego.assert()
 	length := len(values)
-	if length%2 != 0 {
+	if length&1 == 1 {
 		panic("object fields have to be set as key-value pairs")
 	}
 	for i := 0; i < length; i += 2 {
@@ -190,41 +180,34 @@ func (ego *object) Set(values ...any) Object {
 		}
 		ego.val[name] = parseVal(values[i+1])
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) Unset(keys ...string) Object {
-	ego.assert()
 	for _, key := range keys {
 		delete(ego.val, key)
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) Clear() Object {
-	ego.assert()
-	ego.val = make(map[string]field, 0)
-	return ego.ptr
+	ego.val = map[string]field{}
+	return ego.Ego()
 }
 
 func (ego *object) Get(key string) any {
-	ego.assert()
-	if ego.val[key] == nil {
+	field, exists := ego.val[key]
+	if !exists {
 		panic(fmt.Sprintf("object does not have a field '%s'", key))
 	}
-	obj := ego.val[key]
-	switch obj.(type) {
-	case Object, List:
-		return obj
-	default:
-		return obj.getVal()
-	}
+	return field.getVal()
+
 }
 
 func (ego *object) GetObject(key string) Object {
 	o, ok := ego.Get(key).(Object)
 	if !ok {
-		panic("field is not an object")
+		panic(fmt.Sprintf("field '%s' is not an object", key))
 	}
 	return o
 }
@@ -232,7 +215,7 @@ func (ego *object) GetObject(key string) Object {
 func (ego *object) GetList(key string) List {
 	o, ok := ego.Get(key).(List)
 	if !ok {
-		panic("field is not a list")
+		panic(fmt.Sprintf("field '%s' is not a list", key))
 	}
 	return o
 }
@@ -240,7 +223,7 @@ func (ego *object) GetList(key string) List {
 func (ego *object) GetString(key string) string {
 	o, ok := ego.Get(key).(string)
 	if !ok {
-		panic("field is not a string")
+		panic(fmt.Sprintf("field '%s' is not a string", key))
 	}
 	return o
 }
@@ -248,7 +231,7 @@ func (ego *object) GetString(key string) string {
 func (ego *object) GetBool(key string) bool {
 	o, ok := ego.Get(key).(bool)
 	if !ok {
-		panic("field is not a bool")
+		panic(fmt.Sprintf("field '%s' is not a bool", key))
 	}
 	return o
 }
@@ -256,7 +239,7 @@ func (ego *object) GetBool(key string) bool {
 func (ego *object) GetInt(key string) int {
 	o, ok := ego.Get(key).(int)
 	if !ok {
-		panic("field is not an int")
+		panic(fmt.Sprintf("field '%s' is not an int", key))
 	}
 	return o
 }
@@ -264,17 +247,17 @@ func (ego *object) GetInt(key string) int {
 func (ego *object) GetFloat(key string) float64 {
 	o, ok := ego.Get(key).(float64)
 	if !ok {
-		panic("field is not a float")
+		panic(fmt.Sprintf("field '%s' is not a float", key))
 	}
 	return o
 }
 
 func (ego *object) TypeOf(key string) Type {
-	ego.assert()
-	if !ego.KeyExists(key) {
-		return TypeUndefined
-	}
 	switch ego.val[key].(type) {
+	case Object:
+		return TypeObject
+	case List:
+		return TypeList
 	case *atNil:
 		return TypeNil
 	case *atString:
@@ -285,23 +268,18 @@ func (ego *object) TypeOf(key string) Type {
 		return TypeBool
 	case *atFloat:
 		return TypeFloat
-	case *object:
-		return TypeObject
-	case *list:
-		return TypeList
 	default:
-		panic("unknown field type")
+		return TypeUndefined
 	}
 }
 
 func (ego *object) String() string {
-	ego.assert()
-	return ego.ptr.serialize()
+	return ego.Ego().serialize()
 }
 
 func (ego *object) FormatString(indent int) string {
 	if indent < 0 || indent > 10 {
-		panic("invalid indentation")
+		panic(fmt.Sprintf("indentation %d is not between 1 and 10", indent))
 	}
 	buffer := new(bytes.Buffer)
 	json.Indent(buffer, []byte(ego.String()), "", strings.Repeat(" ", indent))
@@ -309,8 +287,7 @@ func (ego *object) FormatString(indent int) string {
 }
 
 func (ego *object) Dict() map[string]any {
-	ego.assert()
-	dict := make(map[string]any, 0)
+	dict := make(map[string]any, ego.Ego().Count())
 	for key, value := range ego.val {
 		dict[key] = value.getVal()
 	}
@@ -334,26 +311,22 @@ func (ego *object) Values() List {
 }
 
 func (ego *object) Clone() Object {
-	ego.assert()
-	return ego.ptr.copy().(*object)
+	return ego.Ego().copy().(*object)
 }
 
 func (ego *object) Count() int {
-	ego.assert()
 	return len(ego.val)
 }
 
 func (ego *object) Empty() bool {
-	return ego.ptr.Count() == 0
+	return ego.Ego().Count() == 0
 }
 
 func (ego *object) Equals(another Object) bool {
-	ego.assert()
-	return ego.ptr.isEqual(another)
+	return ego.Ego().isEqual(another)
 }
 
 func (ego *object) Merge(another Object) Object {
-	ego.assert()
 	result := ego.Clone()
 	another.ForEach(func(key string, val any) {
 		result.Set(key, val)
@@ -362,7 +335,6 @@ func (ego *object) Merge(another Object) Object {
 }
 
 func (ego *object) Pluck(keys ...string) Object {
-	ego.assert()
 	result := NewObject()
 	for _, key := range keys {
 		result.Set(key, ego.Get(key))
@@ -371,129 +343,103 @@ func (ego *object) Pluck(keys ...string) Object {
 }
 
 func (ego *object) Contains(value any) bool {
-	ego.assert()
 	for _, item := range ego.val {
-		switch item.(type) {
-		case Object, List:
-			if item == value {
-				return true
-			}
-		default:
-			if item.getVal() == value {
-				return true
-			}
+		if item.getVal() == value {
+			return true
 		}
 	}
 	return false
 }
 
 func (ego *object) KeyOf(value any) string {
-	ego.assert()
 	for key, item := range ego.val {
-		switch item.(type) {
-		case Object, List:
-			if item == value {
-				return key
-			}
-		default:
-			if item.getVal() == value {
-				return key
-			}
+		if item.getVal() == value {
+			return key
 		}
 	}
 	panic(fmt.Sprintf("object does not contain value %v", value))
 }
 
 func (ego *object) KeyExists(key string) bool {
-	ego.assert()
 	_, ok := ego.val[key]
 	return ok
 }
 
 func (ego *object) ForEach(function func(string, any)) Object {
-	ego.assert()
 	for key, item := range ego.val {
 		function(key, item.getVal())
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) ForEachValue(function func(any)) Object {
-	ego.assert()
 	for _, item := range ego.val {
 		function(item.getVal())
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) ForEachObject(function func(Object)) Object {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(Object)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) ForEachList(function func(List)) Object {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(List)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) ForEachString(function func(string)) Object {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(string)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) ForEachBool(function func(bool)) Object {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(bool)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) ForEachInt(function func(int)) Object {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(int)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) ForEachFloat(function func(float64)) Object {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(float64)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) Map(function func(string, any) any) Object {
-	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
 		result.Set(key, function(key, item.getVal()))
@@ -502,7 +448,6 @@ func (ego *object) Map(function func(string, any) any) Object {
 }
 
 func (ego *object) MapValues(function func(any) any) Object {
-	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
 		result.Set(key, function(item.getVal()))
@@ -511,7 +456,6 @@ func (ego *object) MapValues(function func(any) any) Object {
 }
 
 func (ego *object) MapObjects(function func(Object) any) Object {
-	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
 		val, ok := item.(Object)
@@ -523,7 +467,6 @@ func (ego *object) MapObjects(function func(Object) any) Object {
 }
 
 func (ego *object) MapLists(function func(List) any) Object {
-	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
 		val, ok := item.(List)
@@ -535,7 +478,6 @@ func (ego *object) MapLists(function func(List) any) Object {
 }
 
 func (ego *object) MapStrings(function func(string) any) Object {
-	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
 		val, ok := item.getVal().(string)
@@ -547,7 +489,6 @@ func (ego *object) MapStrings(function func(string) any) Object {
 }
 
 func (ego *object) MapInts(function func(int) any) Object {
-	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
 		val, ok := item.getVal().(int)
@@ -559,7 +500,6 @@ func (ego *object) MapInts(function func(int) any) Object {
 }
 
 func (ego *object) MapFloats(function func(float64) any) Object {
-	ego.assert()
 	result := NewObject()
 	for key, item := range ego.val {
 		val, ok := item.getVal().(float64)
@@ -571,7 +511,6 @@ func (ego *object) MapFloats(function func(float64) any) Object {
 }
 
 func (ego *object) ForEachAsync(function func(string, any)) Object {
-	ego.assert()
 	var wg sync.WaitGroup
 	step := func(group *sync.WaitGroup, k string, x any) {
 		function(k, x)
@@ -582,11 +521,10 @@ func (ego *object) ForEachAsync(function func(string, any)) Object {
 		go step(&wg, key, item.getVal())
 	}
 	wg.Wait()
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *object) MapAsync(function func(string, any) any) Object {
-	ego.assert()
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 	wg.Add(ego.Count())
@@ -605,8 +543,7 @@ func (ego *object) MapAsync(function func(string, any) any) Object {
 }
 
 func (ego *object) GetTF(tf string) any {
-	ego.assert()
-	if tf[0] != '.' || len(tf) < 2 {
+	if len(tf) < 2 || tf[0] != '.' {
 		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
 	}
 	tf = tf[1:]
@@ -617,24 +554,23 @@ func (ego *object) GetTF(tf string) any {
 		if !ego.ptr.KeyExists(key) || ego.ptr.TypeOf(key) != TypeObject {
 			return nil
 		}
-		return ego.ptr.GetObject(key).GetTF(tf[dot:])
+		return ego.Ego().GetObject(key).GetTF(tf[dot:])
 	}
 	if hash > 0 && (dot < 0 || hash < dot) {
 		key := tf[:hash]
 		if !ego.ptr.KeyExists(key) || ego.ptr.TypeOf(key) != TypeList {
 			return nil
 		}
-		return ego.ptr.GetList(key).GetTF(tf[hash:])
+		return ego.Ego().GetList(key).GetTF(tf[hash:])
 	}
 	if !ego.ptr.KeyExists(tf) {
 		return nil
 	}
-	return ego.ptr.Get(tf)
+	return ego.Ego().Get(tf)
 }
 
 func (ego *object) SetTF(tf string, value any) Object {
-	ego.assert()
-	if tf[0] != '.' || len(tf) < 2 {
+	if len(tf) < 2 || tf[0] != '.' {
 		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
 	}
 	tf = tf[1:]
@@ -643,14 +579,14 @@ func (ego *object) SetTF(tf string, value any) Object {
 	if dot > 0 && (hash < 0 || dot < hash) {
 		key := tf[:dot]
 		var object Object
-		if ego.KeyExists(key) {
+		if ego.TypeOf(key) == TypeObject {
 			object = ego.GetObject(key)
 		} else {
 			object = NewObject()
 			ego.Set(key, object)
 		}
 		object.SetTF(tf[dot:], value)
-		return ego.ptr
+		return ego.Ego()
 	}
 	if hash > 0 && (dot < 0 || hash < dot) {
 		key := tf[:hash]
@@ -662,7 +598,7 @@ func (ego *object) SetTF(tf string, value any) Object {
 			ego.Set(key, list)
 		}
 		list.SetTF(tf[hash:], value)
-		return ego.ptr
+		return ego.Ego()
 	}
-	return ego.ptr.Set(tf, value)
+	return ego.Ego().Set(tf, value)
 }

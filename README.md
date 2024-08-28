@@ -401,7 +401,7 @@ var slice []any
 slice = list.Slice()
 ```
 
-- export into type-specific slices - panics if the list is not homogeneous,
+- export into type-specific slices - values of other types are ignored,
 ```go
 var objects []anytype.Object
 objects = list.ObjectSlice()
@@ -636,7 +636,7 @@ floats := list.FilterFloats(func(value float64) bool {
 ```
 
 ### Numeric Operations
-- `IntSum() int` - computes a sum of all elements in the list if all of them are ints,
+- `IntSum() int` - computes a sum of all ints in the list (0 if no ints are present),
 ```go
 sum := list.IntSum()
 ```
@@ -645,7 +645,7 @@ sum := list.IntSum()
 ```go
 sum := list.Sum()
 ```
-- `IntProd() int` - computes a product of all elements in the list if all of them are ints,
+- `IntProd() int` - computes a product of all ints in the list (1 if no ints are present),
 ```go
 product := list.IntProd()
 ```
@@ -655,12 +655,12 @@ product := list.IntProd()
 product := list.Prod()
 ```
 
-- `Avg() float64` - computes an arithmetic mean of all elements in the list,
+- `Avg() float64` - computes an arithmetic mean of all numbers in the list (0 if no ints are present),
 ```go
 average := list.Avg()
 ```
 
-- `IntMin() int` - returns a minimum value in the list (if all elements are ints),
+- `IntMin() int` - returns a minimum integer value in the list (0 if no ints are present),
 ```go
 minimum := list.IntMin()
 ```
@@ -670,7 +670,7 @@ minimum := list.IntMin()
 minimum := list.Min()
 ```
 
-- `IntMax() int` - returns a maximum value in the list (if all elements are ints),
+- `IntMax() int` - returns a maximum integer value in the list (0 if no ints are present),
 ```go
 maximum := list.IntMax()
 ```

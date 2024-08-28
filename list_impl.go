@@ -40,8 +40,8 @@ Returns:
   - pointer to the created list.
 */
 func NewList(values ...any) List {
-	ego := &list{val: make([]field, 0)}
-	ego.ptr = ego
+	ego := &list{val: []field{}}
+	ego.Init(ego)
 	ego.Add(values...)
 	return ego
 }
@@ -59,9 +59,9 @@ Returns:
 */
 func NewListOf(value any, count int) List {
 	ego := &list{val: make([]field, count)}
-	ego.ptr = ego
+	ego.Init(ego)
 	elem := parseVal(value)
-	for i := 0; i < ego.Count(); i++ {
+	for i := 0; i < ego.Ego().Count(); i++ {
 		ego.val[i] = elem
 	}
 	return ego
@@ -115,15 +115,6 @@ func NewListFrom(slice any) List {
 }
 
 /*
-Asserts that the list is initialized.
-*/
-func (ego *list) assert() {
-	if ego == nil || ego.val == nil {
-		panic("list is not initialized")
-	}
-}
-
-/*
 Defined in the field interface.
 Acquires the value of the field, in this case a reference to the whole struct (List is a reference type).
 
@@ -131,7 +122,7 @@ Returns:
   - value of the field.
 */
 func (ego *list) getVal() any {
-	return ego.ptr
+	return ego.Ego()
 }
 
 /*
@@ -143,9 +134,10 @@ Returns:
   - deep copy of the field.
 */
 func (ego *list) copy() any {
-	list := NewList()
-	for _, value := range ego.val {
-		list.Add(value.copy())
+	list := &list{val: make([]field, ego.Ego().Count())}
+	list.Init(list)
+	for i, value := range ego.val {
+		list.val[i] = parseVal(value.copy())
 	}
 	return list
 }
@@ -181,7 +173,7 @@ Returns:
 */
 func (ego *list) isEqual(another any) bool {
 	list, ok := another.(*list)
-	if !ok || ego.Count() != list.Count() {
+	if !ok || ego.Ego().Count() != list.Count() {
 		return false
 	}
 	for i := range ego.val {
@@ -201,72 +193,60 @@ func (ego *list) Ego() List {
 }
 
 func (ego *list) Add(values ...any) List {
-	ego.assert()
 	for _, val := range values {
 		ego.val = append(ego.val, parseVal(val))
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) Insert(index int, value any) List {
-	ego.assert()
-	if index < 0 || index > ego.Count() {
-		panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Count()))
+	if index < 0 || index > ego.Ego().Count() {
+		panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Ego().Count()))
 	}
-	if index == ego.Count() {
-		return ego.ptr.Add(value)
+	if index == ego.Ego().Count() {
+		return ego.Ego().Add(value)
 	}
 	ego.val = append(ego.val[:index+1], ego.val[index:]...)
 	ego.val[index] = parseVal(value)
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) Replace(index int, value any) List {
-	ego.assert()
-	if index < 0 || index > ego.Count() {
-		panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Count()))
+	if index < 0 || index >= ego.Ego().Count() {
+		panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Ego().Count()))
 	}
 	ego.val[index] = parseVal(value)
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) Delete(indexes ...int) List {
-	ego.assert()
 	if len(indexes) > 1 {
 		sort.Ints(indexes)
 	}
 	for i := len(indexes) - 1; i >= 0; i-- {
 		index := indexes[i]
-		if len(ego.val) <= index || index < 0 {
-			panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Count()))
+		if index < 0 || index >= ego.Ego().Count() {
+			panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Ego().Count()))
 		}
 		ego.val = append(ego.val[:index], ego.val[index+1:]...)
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) Pop() List {
-	return ego.ptr.Delete(ego.Count() - 1)
+	return ego.Ego().Delete(ego.Ego().Count() - 1)
 }
 
 func (ego *list) Clear() List {
-	ego.assert()
-	ego.val = make([]field, 0)
-	return ego.ptr
+	ego.val = []field{}
+	return ego.Ego()
 }
 
 func (ego *list) Get(index int) any {
-	ego.assert()
 	if len(ego.val) <= index || index < 0 {
-		panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Count()))
+		panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Ego().Count()))
 	}
-	obj := ego.val[index]
-	switch obj.(type) {
-	case Object, List:
-		return obj
-	default:
-		return obj.getVal()
-	}
+	return ego.val[index].getVal()
 }
 
 func (ego *list) GetObject(index int) Object {
@@ -318,33 +298,29 @@ func (ego *list) GetFloat(index int) float64 {
 }
 
 func (ego *list) TypeOf(index int) Type {
-	ego.assert()
-	if index >= ego.Count() {
-		return TypeUndefined
+	if index >= 0 && index < ego.Ego().Count() {
+		switch ego.val[index].(type) {
+		case Object:
+			return TypeObject
+		case List:
+			return TypeList
+		case *atNil:
+			return TypeNil
+		case *atString:
+			return TypeString
+		case *atInt:
+			return TypeInt
+		case *atBool:
+			return TypeBool
+		case *atFloat:
+			return TypeFloat
+		}
 	}
-	switch ego.val[index].(type) {
-	case *atString:
-		return TypeString
-	case *atInt:
-		return TypeInt
-	case *atBool:
-		return TypeBool
-	case *atFloat:
-		return TypeFloat
-	case Object:
-		return TypeObject
-	case List:
-		return TypeList
-	case *atNil:
-		return TypeNil
-	default:
-		panic("unknown element type")
-	}
+	return TypeUndefined
 }
 
 func (ego *list) String() string {
-	ego.assert()
-	return ego.ptr.serialize()
+	return ego.Ego().serialize()
 }
 
 func (ego *list) FormatString(indent int) string {
@@ -357,8 +333,7 @@ func (ego *list) FormatString(indent int) string {
 }
 
 func (ego *list) Slice() []any {
-	ego.assert()
-	slice := make([]any, 0)
+	slice := []any{}
 	for _, item := range ego.val {
 		slice = append(slice, item.getVal())
 	}
@@ -366,110 +341,99 @@ func (ego *list) Slice() []any {
 }
 
 func (ego *list) ObjectSlice() []Object {
-	ego.assert()
-	if !ego.AllObjects() {
-		panic("all elements have to be objects")
-	}
-	slice := make([]Object, 0)
+	slice := []Object{}
 	for _, item := range ego.val {
-		slice = append(slice, item.(Object))
+		object, ok := item.(Object)
+		if ok {
+			slice = append(slice, object)
+		}
 	}
 	return slice
 }
 
 func (ego *list) ListSlice() []List {
-	ego.assert()
-	if !ego.AllLists() {
-		panic("all elements have to be lists")
-	}
-	slice := make([]List, 0)
+	slice := []List{}
 	for _, item := range ego.val {
-		slice = append(slice, item.(List))
+		list, ok := item.(List)
+		if ok {
+			slice = append(slice, list)
+		}
 	}
 	return slice
 }
 
 func (ego *list) StringSlice() []string {
-	ego.assert()
-	if !ego.AllStrings() {
-		panic("all elements have to be strings")
-	}
-	slice := make([]string, 0)
+	slice := []string{}
 	for _, item := range ego.val {
-		slice = append(slice, item.getVal().(string))
+		str, ok := item.getVal().(string)
+		if ok {
+			slice = append(slice, str)
+		}
 	}
 	return slice
 }
 
 func (ego *list) BoolSlice() []bool {
-	ego.assert()
-	if !ego.AllBools() {
-		panic("all elements have to be bools")
-	}
-	slice := make([]bool, 0)
+	slice := []bool{}
 	for _, item := range ego.val {
-		slice = append(slice, item.getVal().(bool))
+		boolean, ok := item.getVal().(bool)
+		if ok {
+			slice = append(slice, boolean)
+		}
 	}
 	return slice
 }
 
 func (ego *list) IntSlice() []int {
-	ego.assert()
-	if !ego.AllInts() {
-		panic("all elements have to be ints")
-	}
-	slice := make([]int, 0)
+	slice := []int{}
 	for _, item := range ego.val {
-		slice = append(slice, item.getVal().(int))
+		integer, ok := item.getVal().(int)
+		if ok {
+			slice = append(slice, integer)
+		}
 	}
 	return slice
 }
 
 func (ego *list) FloatSlice() []float64 {
-	ego.assert()
-	if !ego.AllFloats() {
-		panic("all elements have to be floats")
-	}
-	slice := make([]float64, 0)
+	slice := []float64{}
 	for _, item := range ego.val {
-		slice = append(slice, item.getVal().(float64))
+		float, ok := item.getVal().(float64)
+		if ok {
+			slice = append(slice, float)
+		}
 	}
 	return slice
 }
 
 func (ego *list) Clone() List {
-	ego.assert()
-	return ego.ptr.copy().(*list)
+	return ego.copy().(*list)
 }
 
 func (ego *list) Count() int {
-	ego.assert()
 	return len(ego.val)
 }
 
 func (ego *list) Empty() bool {
-	return ego.ptr.Count() == 0
+	return ego.Ego().Count() == 0
 }
 
 func (ego *list) Equals(another List) bool {
-	ego.assert()
-	return ego.ptr.isEqual(another)
+	return ego.isEqual(another)
 }
 
 func (ego *list) Concat(another List) List {
-	ego.assert()
 	newList := &list{val: append(ego.val, another.getVal().(*list).val...)}
 	newList.Init(newList)
 	return newList
 }
 
 func (ego *list) SubList(start int, end int) List {
-	ego.assert()
-	if end > ego.Count() || end < -ego.Count() {
-		panic(fmt.Sprintf("ending index %d out of range with count %d", end, ego.Count()))
+	if end > ego.Ego().Count() || end < -ego.Ego().Count() {
+		panic(fmt.Sprintf("ending index %d out of range with count %d", end, ego.Ego().Count()))
 	}
 	if end <= 0 {
-		end = ego.Count() + end
+		end = ego.Ego().Count() + end
 	}
 	if start > end {
 		panic("starting index is higher than the ending index")
@@ -484,41 +448,24 @@ func (ego *list) SubList(start int, end int) List {
 }
 
 func (ego *list) Contains(elem any) bool {
-	ego.assert()
 	for _, item := range ego.val {
-		switch item.(type) {
-		case Object, List:
-			if item == elem {
-				return true
-			}
-		default:
-			if item.getVal() == elem {
-				return true
-			}
+		if item.getVal() == elem {
+			return true
 		}
 	}
 	return false
 }
 
 func (ego *list) IndexOf(elem any) int {
-	ego.assert()
 	for i, item := range ego.val {
-		switch item.(type) {
-		case Object, List:
-			if item == elem {
-				return i
-			}
-		default:
-			if item.getVal() == elem {
-				return i
-			}
+		if item.getVal() == elem {
+			return i
 		}
 	}
 	return -1
 }
 
 func (ego *list) Sort() List {
-	ego.assert()
 	switch ego.val[0].(type) {
 	case *atString:
 		slice := ego.StringSlice()
@@ -535,20 +482,18 @@ func (ego *list) Sort() List {
 	default:
 		panic("list has to be homogeneous with all elements numeric or strings")
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) Reverse() List {
-	ego.assert()
-	for i := ego.Count()/2 - 1; i >= 0; i-- {
-		opp := ego.Count() - 1 - i
+	for i := ego.Ego().Count()/2 - 1; i >= 0; i-- {
+		opp := ego.Ego().Count() - 1 - i
 		ego.val[i], ego.val[opp] = ego.val[opp], ego.val[i]
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) AllObjects() bool {
-	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(Object)
 		if !ok {
@@ -559,7 +504,6 @@ func (ego *list) AllObjects() bool {
 }
 
 func (ego *list) AllLists() bool {
-	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(List)
 		if !ok {
@@ -570,7 +514,6 @@ func (ego *list) AllLists() bool {
 }
 
 func (ego *list) AllStrings() bool {
-	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(*atString)
 		if !ok {
@@ -581,7 +524,6 @@ func (ego *list) AllStrings() bool {
 }
 
 func (ego *list) AllBools() bool {
-	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(*atBool)
 		if !ok {
@@ -592,7 +534,6 @@ func (ego *list) AllBools() bool {
 }
 
 func (ego *list) AllInts() bool {
-	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(*atInt)
 		if !ok {
@@ -603,7 +544,6 @@ func (ego *list) AllInts() bool {
 }
 
 func (ego *list) AllFloats() bool {
-	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(*atFloat)
 		if !ok {
@@ -614,7 +554,6 @@ func (ego *list) AllFloats() bool {
 }
 
 func (ego *list) AllNumeric() bool {
-	ego.assert()
 	for _, item := range ego.val {
 		_, ok := item.(*atInt)
 		if !ok {
@@ -628,89 +567,80 @@ func (ego *list) AllNumeric() bool {
 }
 
 func (ego *list) ForEach(function func(int, any)) List {
-	ego.assert()
 	for i, item := range ego.val {
 		function(i, item.getVal())
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) ForEachValue(function func(any)) List {
-	ego.assert()
 	for _, item := range ego.val {
 		function(item.getVal())
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) ForEachObject(function func(Object)) List {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.(Object)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) ForEachList(function func(List)) List {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.(List)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) ForEachString(function func(string)) List {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(string)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) ForEachBool(function func(bool)) List {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(bool)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) ForEachInt(function func(int)) List {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(int)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) ForEachFloat(function func(float64)) List {
-	ego.assert()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(float64)
 		if ok {
 			function(val)
 		}
 	}
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) Map(function func(int, any) any) List {
-	ego.assert()
 	result := NewList()
 	for i, item := range ego.val {
 		result.Add(function(i, item.getVal()))
@@ -719,7 +649,6 @@ func (ego *list) Map(function func(int, any) any) List {
 }
 
 func (ego *list) MapValues(function func(any) any) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		result.Add(function(item.getVal()))
@@ -728,7 +657,6 @@ func (ego *list) MapValues(function func(any) any) List {
 }
 
 func (ego *list) MapObjects(function func(Object) any) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		val, ok := item.(Object)
@@ -740,7 +668,6 @@ func (ego *list) MapObjects(function func(Object) any) List {
 }
 
 func (ego *list) MapLists(function func(List) any) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		val, ok := item.(List)
@@ -752,7 +679,6 @@ func (ego *list) MapLists(function func(List) any) List {
 }
 
 func (ego *list) MapStrings(function func(string) any) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(string)
@@ -764,7 +690,6 @@ func (ego *list) MapStrings(function func(string) any) List {
 }
 
 func (ego *list) MapInts(function func(int) any) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(int)
@@ -776,7 +701,6 @@ func (ego *list) MapInts(function func(int) any) List {
 }
 
 func (ego *list) MapFloats(function func(float64) any) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(float64)
@@ -788,7 +712,6 @@ func (ego *list) MapFloats(function func(float64) any) List {
 }
 
 func (ego *list) Reduce(initial any, function func(any, any) any) any {
-	ego.assert()
 	result := initial
 	for _, item := range ego.val {
 		result = function(result, item.getVal())
@@ -797,7 +720,6 @@ func (ego *list) Reduce(initial any, function func(any, any) any) any {
 }
 
 func (ego *list) ReduceStrings(initial string, function func(string, string) string) string {
-	ego.assert()
 	result := initial
 	for _, item := range ego.val {
 		val, ok := item.getVal().(string)
@@ -809,7 +731,6 @@ func (ego *list) ReduceStrings(initial string, function func(string, string) str
 }
 
 func (ego *list) ReduceInts(initial int, function func(int, int) int) int {
-	ego.assert()
 	result := initial
 	for _, item := range ego.val {
 		val, ok := item.getVal().(int)
@@ -821,7 +742,6 @@ func (ego *list) ReduceInts(initial int, function func(int, int) int) int {
 }
 
 func (ego *list) ReduceFloats(initial float64, function func(float64, float64) float64) float64 {
-	ego.assert()
 	result := initial
 	for _, item := range ego.val {
 		val, ok := item.getVal().(float64)
@@ -833,7 +753,6 @@ func (ego *list) ReduceFloats(initial float64, function func(float64, float64) f
 }
 
 func (ego *list) Filter(function func(any) bool) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		if function(item.getVal()) {
@@ -844,7 +763,6 @@ func (ego *list) Filter(function func(any) bool) List {
 }
 
 func (ego *list) FilterObjects(function func(Object) bool) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		val, ok := item.(Object)
@@ -856,7 +774,6 @@ func (ego *list) FilterObjects(function func(Object) bool) List {
 }
 
 func (ego *list) FilterLists(function func(List) bool) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		val, ok := item.(List)
@@ -868,7 +785,6 @@ func (ego *list) FilterLists(function func(List) bool) List {
 }
 
 func (ego *list) FilterStrings(function func(string) bool) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(string)
@@ -880,7 +796,6 @@ func (ego *list) FilterStrings(function func(string) bool) List {
 }
 
 func (ego *list) FilterInts(function func(int) bool) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(int)
@@ -892,7 +807,6 @@ func (ego *list) FilterInts(function func(int) bool) List {
 }
 
 func (ego *list) FilterFloats(function func(float64) bool) List {
-	ego.assert()
 	result := NewList()
 	for _, item := range ego.val {
 		val, ok := item.getVal().(float64)
@@ -903,160 +817,168 @@ func (ego *list) FilterFloats(function func(float64) bool) List {
 	return result
 }
 
-func (ego *list) IntSum() int {
-	if !ego.AllInts() {
-		panic("all elements have to be ints")
-	}
-	var result int
+func (ego *list) IntSum() (result int) {
 	for _, item := range ego.val {
-		result += item.getVal().(int)
+		value, ok := item.getVal().(int)
+		if !ok {
+			panic("all elements have to be ints")
+		}
+		result += value
 	}
-	return result
+	return
 }
 
-func (ego *list) Sum() float64 {
-	if !ego.AllNumeric() {
-		panic("all elements have to be numeric")
-	}
-	var result float64
+func (ego *list) Sum() (result float64) {
 	for _, item := range ego.val {
 		val, ok := item.getVal().(int)
 		if ok {
 			result += float64(val)
+		} else if val, ok := item.getVal().(float64); ok {
+			result += val
 		} else {
-			result += item.getVal().(float64)
+			panic("all elements have to be numeric")
 		}
 
 	}
 	return result
 }
 
-func (ego *list) IntProd() int {
-	if !ego.AllInts() {
-		panic("all elements have to be ints")
-	}
-	result := 1
+func (ego *list) IntProd() (result int) {
+	result = 1
 	for _, item := range ego.val {
-		result *= item.getVal().(int)
+		value, ok := item.getVal().(int)
+		if !ok {
+			panic("all elements have to be ints")
+		}
+		result *= value
 	}
-	return result
+	return
 }
 
-func (ego *list) Prod() float64 {
-	if !ego.AllNumeric() {
-		panic("all elements have to be numeric")
-	}
-	result := 1.0
+func (ego *list) Prod() (result float64) {
+	result = 1
 	for _, item := range ego.val {
 		val, ok := item.getVal().(int)
 		if ok {
 			result *= float64(val)
+		} else if val, ok := item.getVal().(float64); ok {
+			result *= val
 		} else {
-			result *= item.getVal().(float64)
+			panic("all elements have to be numeric")
 		}
 	}
 	return result
 }
 
 func (ego *list) Avg() float64 {
-	return ego.ptr.Sum() / float64(ego.Count())
+	return ego.Ego().Sum() / float64(ego.Ego().Count())
 }
 
 func (ego *list) IntMin() int {
-	if ego.AllInts() {
-		return ego.ptr.ReduceInts(math.MaxInt, func(min int, item int) int {
-			if item < min {
-				return item
-			} else {
-				return min
-			}
-		})
+	var present bool
+	min := ego.Ego().ReduceInts(math.MaxInt, func(min int, item int) int {
+		present = true
+		if item < min {
+			return item
+		} else {
+			return min
+		}
+	})
+	if present {
+		return min
 	} else {
-		panic("all elements have to be ints")
+		return 0
 	}
 }
 
 func (ego *list) Min() float64 {
-	if ego.AllNumeric() {
-		return ego.ptr.Reduce(math.MaxFloat64, func(min any, item any) any {
-			val, ok := item.(int)
-			if ok {
-				if float64(val) < min.(float64) {
-					return float64(val)
-				} else {
-					return min
-				}
+	var present bool
+	min := ego.Ego().Reduce(math.MaxFloat64, func(min any, item any) any {
+		present = true
+		val, ok := item.(int)
+		if ok {
+			if float64(val) < min.(float64) {
+				return float64(val)
 			} else {
-				if item.(float64) < min.(float64) {
-					return item
-				} else {
-					return min
-				}
+				return min
 			}
-		}).(float64)
+		} else {
+			if item.(float64) < min.(float64) {
+				return item
+			} else {
+				return min
+			}
+		}
+	}).(float64)
+	if present {
+		return min
 	} else {
-		panic("all elements have to be numeric")
+		return 0
 	}
 }
 
 func (ego *list) IntMax() int {
-	if ego.AllInts() {
-		return ego.ptr.ReduceInts(math.MinInt, func(max int, item int) int {
-			if item > max {
-				return item
-			} else {
-				return max
-			}
-		})
+	var present bool
+	max := ego.Ego().ReduceInts(math.MinInt, func(max int, item int) int {
+		present = true
+		if item > max {
+			return item
+		} else {
+			return max
+		}
+	})
+	if present {
+		return max
 	} else {
-		panic("all elements have to be ints")
+		return 0
 	}
 }
 
 func (ego *list) Max() float64 {
-	if ego.AllNumeric() {
-		return ego.ptr.Reduce(-math.MaxFloat64, func(max any, item any) any {
-			val, ok := item.(int)
-			if ok {
-				if float64(val) > max.(float64) {
-					return float64(val)
-				} else {
-					return max
-				}
+	var present bool
+	max := ego.Ego().Reduce(-math.MaxFloat64, func(max any, item any) any {
+		present = true
+		val, ok := item.(int)
+		if ok {
+			if float64(val) > max.(float64) {
+				return float64(val)
 			} else {
-				if item.(float64) > max.(float64) {
-					return item
-				} else {
-					return max
-				}
+				return max
 			}
-		}).(float64)
+		} else {
+			if item.(float64) > max.(float64) {
+				return item
+			} else {
+				return max
+			}
+		}
+	}).(float64)
+	if present {
+		return max
 	} else {
-		panic("all elements have to be numeric")
+		return 0
 	}
 }
 
 func (ego *list) ForEachAsync(function func(int, any)) List {
-	ego.assert()
 	var wg sync.WaitGroup
 	step := func(group *sync.WaitGroup, i int, x any) {
 		function(i, x)
 		group.Done()
 	}
-	wg.Add(ego.Count())
+	wg.Add(ego.Ego().Count())
 	for i, item := range ego.val {
 		go step(&wg, i, item.getVal())
 	}
 	wg.Wait()
-	return ego.ptr
+	return ego.Ego()
 }
 
 func (ego *list) MapAsync(function func(int, any) any) List {
-	ego.assert()
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
-	wg.Add(ego.Count())
-	result := NewListOf(nil, ego.Count())
+	wg.Add(ego.Ego().Count())
+	result := NewListOf(nil, ego.Ego().Count())
 	step := func(group *sync.WaitGroup, i int, x any) {
 		mutex.Lock()
 		result.Replace(i, function(i, x))
@@ -1071,8 +993,7 @@ func (ego *list) MapAsync(function func(int, any) any) List {
 }
 
 func (ego *list) GetTF(tf string) any {
-	ego.assert()
-	if tf[0] != '#' || len(tf) < 2 {
+	if len(tf) < 2 || tf[0] != '#' {
 		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
 	}
 	tf = tf[1:]
@@ -1087,7 +1008,7 @@ func (ego *list) GetTF(tf string) any {
 		if index >= ego.ptr.Count() || ego.ptr.TypeOf(index) != TypeObject {
 			return nil
 		}
-		return ego.ptr.GetObject(int(integer)).GetTF(tf[dot:])
+		return ego.Ego().GetObject(int(integer)).GetTF(tf[dot:])
 	}
 	if hash > 0 && (dot < 0 || hash < dot) {
 		integer, err := strconv.ParseInt(tf[:hash], 0, bits.UintSize)
@@ -1098,7 +1019,7 @@ func (ego *list) GetTF(tf string) any {
 		if index >= ego.ptr.Count() || ego.ptr.TypeOf(index) != TypeList {
 			return nil
 		}
-		return ego.ptr.GetList(index).GetTF(tf[hash:])
+		return ego.Ego().GetList(index).GetTF(tf[hash:])
 	}
 	integer, err := strconv.ParseInt(tf, 0, bits.UintSize)
 	if err != nil {
@@ -1108,12 +1029,11 @@ func (ego *list) GetTF(tf string) any {
 	if index >= ego.ptr.Count() {
 		return nil
 	}
-	return ego.ptr.Get(index)
+	return ego.Ego().Get(index)
 }
 
 func (ego *list) SetTF(tf string, value any) List {
-	ego.assert()
-	if tf[0] != '#' || len(tf) < 2 {
+	if len(tf) < 2 || tf[0] != '#' {
 		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
 	}
 	tf = tf[1:]
@@ -1125,14 +1045,14 @@ func (ego *list) SetTF(tf string, value any) List {
 			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:dot]))
 		}
 		var object Object
-		if int(integer) < ego.Count() {
+		if ego.TypeOf(int(integer)) == TypeObject {
 			object = ego.GetObject(int(integer))
 		} else {
 			object = NewObject()
 			ego.ptr.Insert(int(integer), object)
 		}
 		object.SetTF(tf[dot:], value)
-		return ego.ptr
+		return ego.Ego()
 	}
 	if hash > 0 && (dot < 0 || hash < dot) {
 		integer, err := strconv.ParseInt(tf[:hash], 0, bits.UintSize)
@@ -1140,18 +1060,18 @@ func (ego *list) SetTF(tf string, value any) List {
 			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:hash]))
 		}
 		var list List
-		if int(integer) < ego.Count() {
+		if int(integer) < ego.Ego().Count() {
 			list = ego.GetList(int(integer))
 		} else {
 			list = NewList()
 			ego.ptr.Insert(int(integer), list)
 		}
 		list.SetTF(tf[hash:], value)
-		return ego.ptr
+		return ego.Ego()
 	}
 	integer, err := strconv.ParseInt(tf, 0, bits.UintSize)
 	if err != nil {
 		panic(fmt.Sprintf("'%s' cannot be converted to int", tf))
 	}
-	return ego.ptr.Insert(int(integer), value)
+	return ego.Ego().Insert(int(integer), value)
 }

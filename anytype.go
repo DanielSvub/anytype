@@ -92,6 +92,8 @@ func parseVal(val any) field {
 		return newInt(int(v))
 	case int8:
 		return newInt(int(v))
+	case uint:
+		return newInt(int(v))
 	case uint64:
 		return newInt(int(v))
 	case uint32:
