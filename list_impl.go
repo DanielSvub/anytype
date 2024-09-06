@@ -30,8 +30,7 @@ type list struct {
 }
 
 /*
-List constructor.
-Creates a new list.
+NewList creates a new list.
 
 Parameters:
   - values... - any amount of initial elements.
@@ -47,8 +46,7 @@ func NewList(values ...any) List {
 }
 
 /*
-List constructor.
-Creates a new list of n repeated values.
+NewListOf creates a new list of n repeated values.
 
 Parameters:
   - value - value to repeat,
@@ -68,8 +66,7 @@ func NewListOf(value any, count int) List {
 }
 
 /*
-List constructor.
-Converts a slice of supported types to a list.
+NewListFrom converts a slice of supported types to a list.
 
 Parameters:
   - slice - original slice.
@@ -480,7 +477,7 @@ func (ego *list) Sort() List {
 		sort.Float64s(slice)
 		ego.val = NewListFrom(slice).(*list).val
 	default:
-		panic("list has to be homogeneous with all elements numeric or strings")
+		panic("list has to be homogeneous with all elements either strings, ints or floats")
 	}
 	return ego.Ego()
 }

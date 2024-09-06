@@ -6,16 +6,13 @@ Object (dictionary) type
 package anytype
 
 /*
-Object, an unordered set of key-value pairs.
-
-Extends:
-  - field.
+Object is an unordered set of key-value pairs.
 */
 type Object interface {
 	field
 
 	/*
-		Initializes the ego pointer, which allows deriving.
+		Init initializes the ego pointer, which allows deriving.
 
 		Parameters:
 		  - ptr - ego pointer.
@@ -23,7 +20,7 @@ type Object interface {
 	Init(ptr Object)
 
 	/*
-		Acquires the ego pointer previously set by Init.
+		Ego acquires the ego pointer previously set by Init.
 
 		Returns:
 		  - ego pointer.
@@ -31,7 +28,7 @@ type Object interface {
 	Ego() Object
 
 	/*
-		Sets values of the fields.
+		Set sets values of the fields.
 		If the key already exists, the value is overwritten, if not, new field is created.
 		If one key is given multiple times, the value is set to the last provided value.
 
@@ -44,7 +41,7 @@ type Object interface {
 	Set(values ...any) Object
 
 	/*
-		Deletes the fields with the given keys. If the key does not exist, nothing happens.
+		Unset deletes the fields with the given keys. If the key does not exist, nothing happens.
 
 		Parameters:
 		  - keys... - any amount of keys to delete.
@@ -55,7 +52,7 @@ type Object interface {
 	Unset(keys ...string) Object
 
 	/*
-		Deletes all fields in the object.
+		Clear deletes all fields in the object.
 
 		Returns:
 		  - updated object.
@@ -63,7 +60,7 @@ type Object interface {
 	Clear() Object
 
 	/*
-		Acquires a value under the specified key of the object.
+		Get acquires a value under the specified key of the object.
 
 		Parameters:
 		  - key - key of the field to get.
@@ -74,7 +71,7 @@ type Object interface {
 	Get(key string) any
 
 	/*
-		Acquires a nested object under the specified key of the object.
+		GetObject acquires a nested object under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -86,7 +83,7 @@ type Object interface {
 	GetObject(key string) Object
 
 	/*
-		Acquires a list under the specified key of the object.
+		GetList acquires a list under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -98,7 +95,7 @@ type Object interface {
 	GetList(key string) List
 
 	/*
-		Acquires a string under the specified key of the object.
+		GetString acquires a string under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -110,7 +107,7 @@ type Object interface {
 	GetString(key string) string
 
 	/*
-		Acquires a bool under the specified key of the object.
+		GetBool acquires a bool under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -122,7 +119,7 @@ type Object interface {
 	GetBool(key string) bool
 
 	/*
-		Acquires an int under the specified key of the object.
+		GetInt acquires an int under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -134,7 +131,7 @@ type Object interface {
 	GetInt(key string) int
 
 	/*
-		Acquires a float under the specified key of the object.
+		GetFloat acquires a float under the specified key of the object.
 		Causes a panic if the field has another type.
 
 		Parameters:
@@ -146,7 +143,7 @@ type Object interface {
 	GetFloat(key string) float64
 
 	/*
-		Gives a type of the field under the specified key of the object.
+		TypeOf gives a type of the field under the specified key of the object.
 		If the key does not exist, 0 (TypeUndefined) is returned.
 
 		Parameters:
@@ -158,7 +155,7 @@ type Object interface {
 	TypeOf(key string) Type
 
 	/*
-		Gives a JSON representation of the object, including nested objects and lists.
+		String gives a JSON representation of the object, including nested objects and lists.
 
 		Returns:
 		  - JSON string.
@@ -166,7 +163,7 @@ type Object interface {
 	String() string
 
 	/*
-		Gives a JSON representation of the object in standardized format with the given indentation.
+		FormatString gives a JSON representation of the object in standardized format with the given indentation.
 
 		Parameters:
 		  - indent - indentation spaces (0-10).
@@ -177,7 +174,7 @@ type Object interface {
 	FormatString(indent int) string
 
 	/*
-		Converts the object into a Go map of empty interfaces.
+		Dict converts the object into a Go map of empty interfaces.
 
 		Returns:
 		  - map.
@@ -185,7 +182,7 @@ type Object interface {
 	Dict() map[string]any
 
 	/*
-		Convers the object to a list of its keys.
+		Keys convers the object to a list of its keys.
 
 		Returns:
 		  - list of keys of the object.
@@ -193,7 +190,7 @@ type Object interface {
 	Keys() List
 
 	/*
-		Convers the object to a list of its values.
+		Values convers the object to a list of its values.
 
 		Returns:
 		  - list of values of the object.
@@ -201,7 +198,7 @@ type Object interface {
 	Values() List
 
 	/*
-		Creates a deep copy of the object.
+		Clone creates a deep copy of the object.
 
 		Returns:
 		  - copied object.
@@ -209,7 +206,7 @@ type Object interface {
 	Clone() Object
 
 	/*
-		Gives a number of fields of the object.
+		Count gives a number of fields of the object.
 
 		Returns:
 		  - number of fields.
@@ -217,7 +214,7 @@ type Object interface {
 	Count() int
 
 	/*
-		Checks whether the object is empty.
+		Empty checks whether the object is empty.
 
 		Returns:
 		  - true if the object is empty, false otherwise.
@@ -225,7 +222,7 @@ type Object interface {
 	Empty() bool
 
 	/*
-		Checks if the content of the object is equal to the content of another object.
+		Equals checks if the content of the object is equal to the content of another object.
 		Nested objects and lists are compared recursively (by value).
 
 		Parameters:
@@ -237,7 +234,7 @@ type Object interface {
 	Equals(another Object) bool
 
 	/*
-		Creates a new object containing all elements of the old object and another object.
+		Merge creates a new object containing all elements of the old object and another object.
 		The old object remains unchanged.
 		If both objects contain the same key, the value from another object is used.
 
@@ -250,7 +247,7 @@ type Object interface {
 	Merge(another Object) Object
 
 	/*
-		Creates a new object containing the given fields of the existing object.
+		Pluck creates a new object containing the given fields of the existing object.
 		The old object remains unchanged.
 
 		Parameters:
@@ -262,7 +259,7 @@ type Object interface {
 	Pluck(keys ...string) Object
 
 	/*
-		Checks if the object contains a field with a given value.
+		Contains checks if the object contains a field with a given value.
 		Objects and lists are compared by reference.
 
 		Parameters:
@@ -274,7 +271,7 @@ type Object interface {
 	Contains(value any) bool
 
 	/*
-		Gives a key containing a given value.
+		KeyOf gives a key containing a given value.
 		If multiple keys contain the value, any of them is returned.
 
 		Parameters:
@@ -286,7 +283,7 @@ type Object interface {
 	KeyOf(value any) string
 
 	/*
-		Checks if a given key exists within the object.
+		KeyExists checks if a given key exists within the object.
 
 		Parameters:
 		  - key - the key to check.
@@ -297,7 +294,7 @@ type Object interface {
 	KeyExists(key string) bool
 
 	/*
-		Executes a given function over an every field of the object.
+		ForEach executes a given function over an every field of the object.
 		The function has two parameters: key of the current field and its value.
 
 		Parameters:
@@ -309,7 +306,7 @@ type Object interface {
 	ForEach(function func(key string, val any)) Object
 
 	/*
-		Executes a given function over an every field of the object.
+		ForEachValue executes a given function over an every field of the object.
 		The function has one parameter, value of the current field.
 
 		Parameters:
@@ -321,7 +318,7 @@ type Object interface {
 	ForEachValue(function func(x any)) Object
 
 	/*
-		Executes a given function over all objects nested in the object.
+		ForEachObject executes a given function over all objects nested in the object.
 		Fields of other types are ignored.
 		The function has one parameter, the current object.
 
@@ -334,7 +331,7 @@ type Object interface {
 	ForEachObject(function func(x Object)) Object
 
 	/*
-		Executes a given function over all lists in the object.
+		ForEachList executes a given function over all lists in the object.
 		Fields of other types are ignored.
 		The function has one parameter, the current list.
 
@@ -347,7 +344,7 @@ type Object interface {
 	ForEachList(function func(x List)) Object
 
 	/*
-		Executes a given function over all strings in the object.
+		ForEachString executes a given function over all strings in the object.
 		Fields of other types are ignored.
 		The function has one parameter, the current string.
 
@@ -360,7 +357,7 @@ type Object interface {
 	ForEachString(function func(x string)) Object
 
 	/*
-		Executes a given function over all bools in the object.
+		ForEachBool executes a given function over all bools in the object.
 		Fields of other types are ignored.
 		The function has one parameter, the current bool.
 
@@ -373,7 +370,7 @@ type Object interface {
 	ForEachBool(function func(x bool)) Object
 
 	/*
-		Executes a given function over all ints in the object.
+		ForEachInt executes a given function over all ints in the object.
 		Fields of other types are ignored.
 		The function has one parameter, the current int.
 
@@ -386,7 +383,7 @@ type Object interface {
 	ForEachInt(function func(x int)) Object
 
 	/*
-		Executes a given function over all floats in the object.
+		ForEachFloat executes a given function over all floats in the object.
 		Fields of other types are ignored.
 		The function has one parameter, the current float.
 
@@ -399,7 +396,7 @@ type Object interface {
 	ForEachFloat(function func(x float64)) Object
 
 	/*
-		Copies the object and modifies each field by a given mapping function.
+		Map copies the object and modifies each field by a given mapping function.
 		The resulting field can have a different type than the original one.
 		The function has two parameters: current key and value of the current element. Returns any.
 		The old object remains unchanged.
@@ -413,7 +410,7 @@ type Object interface {
 	Map(function func(key string, val any) any) Object
 
 	/*
-		Copies the object and modifies each field by a given mapping function.
+		MapValues copies the object and modifies each field by a given mapping function.
 		The resulting field can have a different type than the original one.
 		The function has one parameter, value of the current field, and returns any.
 		The old object remains unchanged.
@@ -427,7 +424,7 @@ type Object interface {
 	MapValues(function func(x any) any) Object
 
 	/*
-		Selects all nested objects in the object and modifies each of them by a given mapping function.
+		MapObjects selects all nested objects in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.
 		The function has one parameter, the current object, and returns any.
@@ -442,7 +439,7 @@ type Object interface {
 	MapObjects(function func(x Object) any) Object
 
 	/*
-		Selects all lists in the object and modifies each of them by a given mapping function.
+		MapLists selects all lists in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.
 		The function has one parameter, the current list, and returns any.
@@ -457,7 +454,7 @@ type Object interface {
 	MapLists(function func(x List) any) Object
 
 	/*
-		Selects all strings in the object and modifies each of them by a given mapping function.
+		MapStrings selects all strings in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.
 		The function has one parameter, the current string, and returns empty interface.
@@ -472,7 +469,7 @@ type Object interface {
 	MapStrings(function func(x string) any) Object
 
 	/*
-		Selects all ints in the object and modifies each of them by a given mapping function.
+		MapInts selects all ints in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.
 		The function has one parameter, the current int, and returns empty interface.
@@ -487,7 +484,7 @@ type Object interface {
 	MapInts(function func(x int) any) Object
 
 	/*
-		Selects all floats in the object and modifies each of them by a given mapping function.
+		MapFloats selects all floats in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.
 		The function has one parameter, the current float, and returns empty interface.
@@ -502,7 +499,7 @@ type Object interface {
 	MapFloats(function func(x float64) any) Object
 
 	/*
-		Parallelly executes a given function over an every field of the object.
+		ForEachAsync parallelly executes a given function over an every field of the object.
 		The function has two parameters: key of the current field and its value.
 		The order of the iterations is random.
 
@@ -515,7 +512,7 @@ type Object interface {
 	ForEachAsync(function func(key string, val any)) Object
 
 	/*
-		Copies the object and paralelly modifies each field by a given mapping function.
+		MapAsync copies the object and paralelly modifies each field by a given mapping function.
 		The resulting field can have a different type than the original one.
 		The function has two parameters: key of the current field and its value.
 		The old object remains unchanged.
@@ -529,7 +526,7 @@ type Object interface {
 	MapAsync(function func(key string, val any) any) Object
 
 	/*
-		Acquires a value specified by a given tree form.
+		GetTF acquires a value specified by a given tree form.
 
 		Parameters:
 		  - tf - tree form string.
@@ -540,7 +537,7 @@ type Object interface {
 	GetTF(tf string) any
 
 	/*
-		Sets a value specified by a given tree form.
+		SetTF sets a value specified by a given tree form.
 
 		Parameters:
 		  - tf - tree form string,

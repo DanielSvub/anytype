@@ -18,8 +18,10 @@ import (
 /*
 Enum of possible states of the parser.
 */
+type parserState uint8
+
 const (
-	stateStart = iota
+	stateStart parserState = iota
 	stateKeyStart
 	stateKey
 	stateKeyEscape
@@ -407,7 +409,7 @@ func parseObject(json string, line *int) (Object, int, error) {
 }
 
 /*
-Creates a new list from JSON.
+ParseList creates a new list from JSON.
 Patameters:
   - json - JSON string to parse.
 
@@ -426,7 +428,7 @@ func ParseList(json string) (List, error) {
 }
 
 /*
-Creates a new object from JSON.
+ParseObject creates a new object from JSON.
 Patameters:
   - json - JSON string to parse.
 
@@ -445,7 +447,7 @@ func ParseObject(json string) (Object, error) {
 }
 
 /*
-Creates a new object from JSON file.
+ParseFile creates a new object from JSON file.
 Patameters:
   - path - path to the file to parse.
 

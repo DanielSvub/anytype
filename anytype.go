@@ -11,7 +11,7 @@ import (
 )
 
 /*
-AnyType data type.
+Type is an enum of AnyType data types.
 */
 type Type uint8
 

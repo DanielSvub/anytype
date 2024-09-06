@@ -27,8 +27,7 @@ type object struct {
 }
 
 /*
-Object constructor.
-Creates a new object.
+NewObject creates a new object.
 
 Parameters:
   - values... - any amount of key-value pairs to set after the object creation.
@@ -44,8 +43,7 @@ func NewObject(values ...any) Object {
 }
 
 /*
-Object constructor.
-Converts a map of supported types to an object.
+NewObjectFrom converts a map of supported types to an object.
 
 Parameters:
   - dict - original map.

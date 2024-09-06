@@ -6,16 +6,13 @@ List (array) type
 package anytype
 
 /*
-List, an ordered sequence of elements.
-
-Extends:
-  - field.
+List is an ordered sequence of elements.
 */
 type List interface {
 	field
 
 	/*
-		Initializes the ego pointer, which allows deriving.
+		Init initializes the ego pointer, which allows deriving.
 
 		Parameters:
 		  - ptr - ego pointer.
@@ -23,7 +20,7 @@ type List interface {
 	Init(ptr List)
 
 	/*
-		Acquires the ego pointer previously set by Init.
+		Ego acquires the ego pointer previously set by Init.
 
 		Returns:
 		  - ego pointer.
@@ -31,7 +28,7 @@ type List interface {
 	Ego() List
 
 	/*
-		Adds new elements at the end of the list.
+		Add adds new elements at the end of the list.
 
 		Parameters:
 		  - values... - any amount of elements to add.
@@ -42,7 +39,7 @@ type List interface {
 	Add(val ...any) List
 
 	/*
-		Inserts a new element at the specified position in the list.
+		Insert inserts a new element at the specified position in the list.
 
 		Parameters:
 		  - index - position where the element should be inserted,
@@ -54,7 +51,7 @@ type List interface {
 	Insert(index int, value any) List
 
 	/*
-		Replaces an existing element with a new one.
+		Replace replaces an existing element with a new one.
 
 		Parameters:
 		  - index - position of the element which should be replaced,
@@ -66,7 +63,7 @@ type List interface {
 	Replace(index int, value any) List
 
 	/*
-		Deletes the elements at the specified positions in the list.
+		Delete deletes the elements at the specified positions in the list.
 
 		Parameters:
 		  - indexes... - any amount of positions of the elements to delete.
@@ -77,7 +74,7 @@ type List interface {
 	Delete(index ...int) List
 
 	/*
-		Deletes the last element in the list.
+		Pop deletes the last element in the list.
 
 		Returns:
 		  - updated list.
@@ -85,7 +82,7 @@ type List interface {
 	Pop() List
 
 	/*
-		Deletes all elements in the list.
+		Clear deletes all elements in the list.
 
 		Returns:
 		  - updated list.
@@ -93,7 +90,7 @@ type List interface {
 	Clear() List
 
 	/*
-		Acquires an element at the specified position in the list.
+		Get acquires an element at the specified position in the list.
 
 		Parameters:
 		  - index - position of the element to get.
@@ -104,7 +101,7 @@ type List interface {
 	Get(index int) any
 
 	/*
-		Acquires an object at the specified position in the list.
+		GetObject acquires an object at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -116,7 +113,7 @@ type List interface {
 	GetObject(index int) Object
 
 	/*
-		Acquires a list at the specified position in the list.
+		GetList acquires a list at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -128,7 +125,7 @@ type List interface {
 	GetList(index int) List
 
 	/*
-		Acquires a string at the specified position in the list.
+		GetString acquires a string at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -140,7 +137,7 @@ type List interface {
 	GetString(index int) string
 
 	/*
-		Acquires a boolean at the specified position in the list.
+		GetBool acquires a boolean at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -152,7 +149,7 @@ type List interface {
 	GetBool(index int) bool
 
 	/*
-		Acquires an integer at the specified position in the list.
+		GetInt acquires an integer at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -164,7 +161,7 @@ type List interface {
 	GetInt(index int) int
 
 	/*
-		Acquires a float at the specified position in the list.
+		GetFloat acquires a float at the specified position in the list.
 		Causes a panic if the element has another type.
 
 		Parameters:
@@ -176,7 +173,7 @@ type List interface {
 	GetFloat(index int) float64
 
 	/*
-		Gives a type of the element at the specified position in the list.
+		TypeOf gives a type of the element at the specified position in the list.
 		If the index is out of range, 0 (TypeUndefined) is returned.
 
 		Parameters:
@@ -188,7 +185,7 @@ type List interface {
 	TypeOf(index int) Type
 
 	/*
-		Gives a JSON representation of the list, including nested lists and objects.
+		String gives a JSON representation of the list, including nested lists and objects.
 
 		Returns:
 		  - JSON string.
@@ -196,7 +193,7 @@ type List interface {
 	String() string
 
 	/*
-		Gives a JSON representation of the list in standardized format with the given indentation.
+		FormatString gives a JSON representation of the list in standardized format with the given indentation.
 
 		Parameters:
 		  - indent - indentation spaces (0-10).
@@ -207,7 +204,7 @@ type List interface {
 	FormatString(indent int) string
 
 	/*
-		Converts the list into a Go slice of any.
+		Slice converts the list into a Go slice of any.
 
 		Returns:
 		  - slice.
@@ -215,8 +212,8 @@ type List interface {
 	Slice() []any
 
 	/*
-		Converts the list of objects into a Go slice.
-		The list has to be homogeneous and all elements have to be objects.
+		ObjectSlice converts the list of objects into a Go slice.
+		Elements of other types are ignored.
 
 		Returns:
 		  - slice.
@@ -224,8 +221,8 @@ type List interface {
 	ObjectSlice() []Object
 
 	/*
-		Converts the list of lists into a Go slice.
-		The list has to be homogeneous and all elements have to be lists.
+		ListSlice converts the list of lists into a Go slice.
+		Elements of other types are ignored.
 
 		Returns:
 		  - slice.
@@ -233,8 +230,8 @@ type List interface {
 	ListSlice() []List
 
 	/*
-		Converts the list of strings into a Go slice.
-		The list has to be homogeneous and all elements have to be strings.
+		StringSlice converts the list of strings into a Go slice.
+		Elements of other types are ignored.
 
 		Returns:
 		  - slice.
@@ -242,8 +239,8 @@ type List interface {
 	StringSlice() []string
 
 	/*
-		Converts the list of bools into a Go slice.
-		The list has to be homogeneous and all elements have to be bools.
+		BoolSlice converts the list of bools into a Go slice.
+		Elements of other types are ignored.
 
 		Returns:
 		  - slice.
@@ -251,8 +248,8 @@ type List interface {
 	BoolSlice() []bool
 
 	/*
-		Converts the list of ints into a Go slice.
-		The list has to be homogeneous and all elements have to be ints.
+		IntSlice converts the list of ints into a Go slice.
+		Elements of other types are ignored.
 
 		Returns:
 		  - slice.
@@ -260,8 +257,8 @@ type List interface {
 	IntSlice() []int
 
 	/*
-		Converts the list of floats into a Go slice.
-		The list has to be homogeneous and all elements have to be floats.
+		FloatSlice converts the list of floats into a Go slice.
+		Elements of other types are ignored.
 
 		Returns:
 		  - slice.
@@ -269,7 +266,7 @@ type List interface {
 	FloatSlice() []float64
 
 	/*
-		Creates a deep copy of the list.
+		Clone creates a deep copy of the list.
 
 		Returns:
 		  - copied list.
@@ -277,7 +274,7 @@ type List interface {
 	Clone() List
 
 	/*
-		Gives a number of elements in the list.
+		Count gives a number of elements in the list.
 
 		Returns:
 		  - number of elements.
@@ -285,7 +282,7 @@ type List interface {
 	Count() int
 
 	/*
-		Checks whether the list is empty.
+		Empty checks whether the list is empty.
 
 		Returns:
 		  - true if the list is empty, false otherwise.
@@ -293,7 +290,7 @@ type List interface {
 	Empty() bool
 
 	/*
-		Checks if the content of the list is equal to the content of another list.
+		Equals checks if the content of the list is equal to the content of another list.
 		Nested objects and lists are compared recursively (by value).
 
 		Parameters:
@@ -305,7 +302,7 @@ type List interface {
 	Equals(another List) bool
 
 	/*
-		Creates a new list containing all elements of the old list and another list.
+		Concat creates a new list containing all elements of the old list and another list.
 		The old list remains unchanged.
 
 		Parameters:
@@ -317,7 +314,7 @@ type List interface {
 	Concat(another List) List
 
 	/*
-		Creates a new list containing the elements from the starting index (including) to the ending index (excluding).
+		SubList creates a new list containing the elements from the starting index (including) to the ending index (excluding).
 		If the ending index is zero, it is set to the length of the list. If negative, it is counted from the end of the list.
 		Starting index has to be non-negative and cannot be higher than the ending index.
 
@@ -331,7 +328,7 @@ type List interface {
 	SubList(start int, end int) List
 
 	/*
-		Checks if the list contains a given element.
+		Contains checks if the list contains a given element.
 		Objects and lists are compared by reference.
 
 		Parameters:
@@ -343,7 +340,7 @@ type List interface {
 	Contains(elem any) bool
 
 	/*
-		Gives a position of the first occurrence of a given element.
+		IndexOf gives a position of the first occurrence of a given element.
 
 		Parameters:
 		  - elem - the element to check.
@@ -354,7 +351,7 @@ type List interface {
 	IndexOf(elem any) int
 
 	/*
-		Sorts elements in the list (ascending).
+		Sort sorts elements in the list (ascending).
 		The list has to be homogeneous, all elements have to be either strings, ints or floats.
 
 		Returns:
@@ -363,7 +360,7 @@ type List interface {
 	Sort() List
 
 	/*
-		Reverses the order of elements in the list.
+		Reverse reverses the order of elements in the list.
 
 		Returns:
 		  - updated list.
@@ -371,7 +368,7 @@ type List interface {
 	Reverse() List
 
 	/*
-		Checks if the list is homogeneous and all of its elements are objects.
+		AllObjects checks if the list is homogeneous and all of its elements are objects.
 
 		Returns:
 		  - true if all elements are objects, false otherwise.
@@ -379,7 +376,7 @@ type List interface {
 	AllObjects() bool
 
 	/*
-		Checks if the list is homogeneous and all of its elements are lists.
+		AllLists checks if the list is homogeneous and all of its elements are lists.
 
 		Returns:
 		  - true if all elements are lists, false otherwise.
@@ -387,7 +384,7 @@ type List interface {
 	AllLists() bool
 
 	/*
-		Checks if the list is homogeneous and all of its elements are strings.
+		AllStrings checks if the list is homogeneous and all of its elements are strings.
 
 		Returns:
 		  - true if all elements are strings, false otherwise.
@@ -395,7 +392,7 @@ type List interface {
 	AllStrings() bool
 
 	/*
-		Checks if the list is homogeneous and all of its elements are bools.
+		AllBools checks if the list is homogeneous and all of its elements are bools.
 
 		Returns:
 		  - true if all elements are bools, false otherwise.
@@ -403,7 +400,7 @@ type List interface {
 	AllBools() bool
 
 	/*
-		Checks if the list is homogeneous and all of its elements are ints.
+		AllInts checks if the list is homogeneous and all of its elements are ints.
 
 		Returns:
 		  - true if all elements are ints, false otherwise.
@@ -411,7 +408,7 @@ type List interface {
 	AllInts() bool
 
 	/*
-		Checks if the list is homogeneous and all of its elements are floats.
+		AllFloats checks if the list is homogeneous and all of its elements are floats.
 
 		Returns:
 		  - true if all elements are floats, false otherwise.
@@ -419,7 +416,7 @@ type List interface {
 	AllFloats() bool
 
 	/*
-		Checks if all elements of the list are numeric (ints or floats).
+		AllNumeric checks if all elements of the list are numeric (ints or floats).
 
 		Returns:
 		  - true if all elements are numeric, false otherwise.
@@ -427,7 +424,7 @@ type List interface {
 	AllNumeric() bool
 
 	/*
-		Executes a given function over an every element of the list.
+		ForEach executes a given function over an every element of the list.
 		The function has two parameters: index of the current element and its value.
 
 		Parameters:
@@ -439,7 +436,7 @@ type List interface {
 	ForEach(function func(i int, val any)) List
 
 	/*
-		Executes a given function over an every element of the list.
+		ForEachValue executes a given function over an every element of the list.
 		The function has one parameter, value of the current element.
 
 		Parameters:
@@ -451,7 +448,7 @@ type List interface {
 	ForEachValue(function func(x any)) List
 
 	/*
-		Executes a given function over all objects in the list.
+		ForEachObject executes a given function over all objects in the list.
 		Elements with other types are ignored.
 		The function has one parameter, the current object.
 
@@ -464,7 +461,7 @@ type List interface {
 	ForEachObject(function func(x Object)) List
 
 	/*
-		Executes a given function over all lists nested in the list.
+		ForEachList executes a given function over all lists nested in the list.
 		Elements with other types are ignored.
 		The function has one parameter, the current list.
 
@@ -477,7 +474,7 @@ type List interface {
 	ForEachList(function func(x List)) List
 
 	/*
-		Executes a given function over all strings in the list.
+		ForEachString executes a given function over all strings in the list.
 		Elements with other types are ignored.
 		The function has one parameter, the current string.
 
@@ -490,7 +487,7 @@ type List interface {
 	ForEachString(function func(x string)) List
 
 	/*
-		Executes a given function over all bools in the list.
+		ForEachBool executes a given function over all bools in the list.
 		Elements with other types are ignored.
 		The function has one parameter, the current bool.
 
@@ -503,7 +500,7 @@ type List interface {
 	ForEachBool(function func(x bool)) List
 
 	/*
-		Executes a given function over all ints in the list.
+		ForEachInt executes a given function over all ints in the list.
 		Elements with other types are ignored.
 		The function has one parameter, the current int.
 
@@ -516,7 +513,7 @@ type List interface {
 	ForEachInt(function func(x int)) List
 
 	/*
-		Executes a given function over all floats in the list.
+		ForEachFloat executes a given function over all floats in the list.
 		Elements with other types are ignored.
 		The function has one parameter, the current float.
 
@@ -529,7 +526,7 @@ type List interface {
 	ForEachFloat(function func(x float64)) List
 
 	/*
-		Copies the list and modifies each element by a given mapping function.
+		Map copies the list and modifies each element by a given mapping function.
 		The resulting element can have a different type than the original one.
 		The function has two parameters: current index and value of the current element. Returns any.
 		The old list remains unchanged.
@@ -543,7 +540,7 @@ type List interface {
 	Map(function func(i int, val any) any) List
 
 	/*
-		Copies the list and modifies each element by a given mapping function.
+		MapValues copies the list and modifies each element by a given mapping function.
 		The resulting element can have a different type than the original one.
 		The function has one parameter, value of the current element, and returns any.
 		The old list remains unchanged.
@@ -557,7 +554,7 @@ type List interface {
 	MapValues(function func(x any) any) List
 
 	/*
-		Selects all objects from the list and modifies each of them by a given mapping function.
+		MapObjects selects all objects from the list and modifies each of them by a given mapping function.
 		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.
 		The function has one parameter, the current object, and returns any.
@@ -572,7 +569,7 @@ type List interface {
 	MapObjects(function func(x Object) any) List
 
 	/*
-		Selects all nested lists from the list and modifies each of them by a given mapping function.
+		MapLists selects all nested lists from the list and modifies each of them by a given mapping function.
 		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.
 		The function has one parameter, the current list, and returns any.
@@ -587,7 +584,7 @@ type List interface {
 	MapLists(function func(x List) any) List
 
 	/*
-		Selects all strings from the list and modifies each of them by a given mapping function.
+		MapStrings selects all strings from the list and modifies each of them by a given mapping function.
 		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.
 		The function has one parameter, the current string, and returns any.
@@ -602,7 +599,7 @@ type List interface {
 	MapStrings(function func(x string) any) List
 
 	/*
-		Selects all ints from the list and modifies each of them by a given mapping function.
+		MapInts selects all ints from the list and modifies each of them by a given mapping function.
 		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.
 		The function has one parameter, the current int, and returns any.
@@ -617,7 +614,7 @@ type List interface {
 	MapInts(function func(x int) any) List
 
 	/*
-		Selects all floats from the list and modifies each of them by a given mapping function.
+		MapFloats selects all floats from the list and modifies each of them by a given mapping function.
 		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.
 		The function has one parameter, the current float, and returns any.
@@ -632,7 +629,7 @@ type List interface {
 	MapFloats(function func(x float64) any) List
 
 	/*
-		Reduces all elements of the list into a single value.
+		Reduce reduces all elements of the list into a single value.
 		The function has two parameters: value returned by the previous iteration and value of the current element. Returns any.
 		The list remains unchanged.
 
@@ -645,7 +642,7 @@ type List interface {
 	Reduce(initial any, function func(acc any, val any) any) any
 
 	/*
-		Reduces all strings in the list into a single string.
+		ReduceStrings reduces all strings in the list into a single string.
 		Elements of other types are ignored.
 		The function has two parameters: string returned by the previous iteration and current string. Returns string.
 		The list remains unchanged.
@@ -659,7 +656,7 @@ type List interface {
 	ReduceStrings(initial string, function func(acc string, val string) string) string
 
 	/*
-		Reduces all ints in the list into a single int.
+		ReduceInts reduces all ints in the list into a single int.
 		Elements of other types are ignored.
 		The function has two parameters: int returned by the previous iteration and current int. Returns int.
 		The list remains unchanged.
@@ -673,7 +670,7 @@ type List interface {
 	ReduceInts(initial int, function func(acc int, val int) int) int
 
 	/*
-		Reduces all floats in the list into a single float.
+		ReduceFloats reduces all floats in the list into a single float.
 		Elements of other types are ignored.
 		The function has two parameters: float returned by the previous iteration and current float. Returns float.
 		The list remains unchanged.
@@ -687,7 +684,7 @@ type List interface {
 	ReduceFloats(initial float64, function func(acc float64, val float64) float64) float64
 
 	/*
-		Creates a new list containing elements of the old one satisfying a condition.
+		Filter creates a new list containing elements of the old one satisfying a condition.
 		The function has one parameter, value of the current element, and returns bool.
 		The old list remains unchanged.
 
@@ -700,7 +697,7 @@ type List interface {
 	Filter(function func(x any) bool) List
 
 	/*
-		Creates a new list containing objects of the old one satisfying a condition.
+		FilterObjects creates a new list containing objects of the old one satisfying a condition.
 		Elements of other types are ignored.
 		The function has one parameter, current object, and returns bool.
 		The old list remains unchanged.
@@ -714,7 +711,7 @@ type List interface {
 	FilterObjects(function func(x Object) bool) List
 
 	/*
-		Creates a new list containing nested lists of the old one satisfying a condition.
+		FilterLists creates a new list containing nested lists of the old one satisfying a condition.
 		Elements of other types are ignored.
 		The function has one parameter, current list, and returns bool.
 		The old list remains unchanged.
@@ -728,7 +725,7 @@ type List interface {
 	FilterLists(function func(x List) bool) List
 
 	/*
-		Creates a new list containing strings of the old one satisfying a condition.
+		FilterStrings creates a new list containing strings of the old one satisfying a condition.
 		Elements of other types are ignored.
 		The function has one parameter, current string, and returns bool.
 		The old list remains unchanged.
@@ -742,7 +739,7 @@ type List interface {
 	FilterStrings(function func(x string) bool) List
 
 	/*
-		Creates a new list containing ints of the old one satisfying a condition.
+		FilterInts creates a new list containing ints of the old one satisfying a condition.
 		Elements of other types are ignored.
 		The function has one parameter, current int, and returns bool.
 		The old list remains unchanged.
@@ -756,7 +753,7 @@ type List interface {
 	FilterInts(function func(x int) bool) List
 
 	/*
-		Creates a new list containing floats of the old one satisfying a condition.
+		FilterFloats creates a new list containing floats of the old one satisfying a condition.
 		Elements of other types are ignored.
 		The function has one parameter, current float, and returns bool.
 		The old list remains unchanged.
@@ -770,7 +767,7 @@ type List interface {
 	FilterFloats(function func(x float64) bool) List
 
 	/*
-		Computes a sum of all elements in the list.
+		IntSum computes a sum of all elements in the list.
 		All elements of the list have to be ints.
 
 		Returns:
@@ -779,7 +776,7 @@ type List interface {
 	IntSum() int
 
 	/*
-		Computes a sum of all elements in the list.
+		Sum computes a sum of all elements in the list.
 		All elements of the list have to be numeric.
 
 		Returns:
@@ -788,7 +785,7 @@ type List interface {
 	Sum() float64
 
 	/*
-		Computes a product of all elements in the list.
+		IntProd computes a product of all elements in the list.
 		All elements of the list have to be ints.
 
 		Returns:
@@ -797,7 +794,7 @@ type List interface {
 	IntProd() int
 
 	/*
-		Computes a product of all elements in the list.
+		Prod computes a product of all elements in the list.
 		All elements of the list have to be numeric.
 
 		Returns:
@@ -806,7 +803,7 @@ type List interface {
 	Prod() float64
 
 	/*
-		Computes an arithmetic mean of all elements in the list.
+		Avg computes an arithmetic mean of all elements in the list.
 		All elements of the list have to be numeric.
 
 		Returns:
@@ -815,8 +812,7 @@ type List interface {
 	Avg() float64
 
 	/*
-		Finds a minimum of the list.
-		All elements of the list have to be ints.
+		IntMin finds a minimum int of the list.
 
 		Returns:
 		  - found minimum (int).
@@ -824,8 +820,7 @@ type List interface {
 	IntMin() int
 
 	/*
-		Finds a minimum of the list.
-		All elements of the list have to be numeric.
+		Min finds a minimum number of the list.
 
 		Returns:
 		  - found minimum (float).
@@ -833,8 +828,7 @@ type List interface {
 	Min() float64
 
 	/*
-		Finds a maximum of the list.
-		All elements of the list have to be ints.
+		IntMax finds a maximum int of the list.
 
 		Returns:
 		  - found maximum (int).
@@ -842,8 +836,7 @@ type List interface {
 	IntMax() int
 
 	/*
-		Finds a maximum of the list.
-		All elements of the list have to be numeric.
+		Max finds a maximum number of the list.
 
 		Returns:
 		  - found maximum (float).
@@ -851,7 +844,7 @@ type List interface {
 	Max() float64
 
 	/*
-		Parallelly executes a given function over an every element of the list.
+		ForEachAsync parallelly executes a given function over an every element of the list.
 		The function has two parameters: index of the current element and its value.
 		The order of the iterations is random.
 
@@ -864,7 +857,7 @@ type List interface {
 	ForEachAsync(function func(i int, val any)) List
 
 	/*
-		Copies the list and paralelly modifies each element by a given mapping function.
+		MapAsync copies the list and paralelly modifies each element by a given mapping function.
 		The resulting element can have a different type than the original one.
 		The function has two parameters: index of the current element and its value.
 		The old list remains unchanged.
@@ -878,7 +871,7 @@ type List interface {
 	MapAsync(function func(i int, val any) any) List
 
 	/*
-		Acquires a value specified by a given tree form.
+		GetTF acquires a value specified by a given tree form.
 
 		Parameters:
 		  - tf - tree form string.
@@ -889,7 +882,7 @@ type List interface {
 	GetTF(tf string) any
 
 	/*
-		Sets a value specified by a given tree form.
+		SetTF sets a value specified by a given tree form.
 
 		Parameters:
 		  - tf - tree form string,
