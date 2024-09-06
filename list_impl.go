@@ -817,10 +817,9 @@ func (ego *list) FilterFloats(function func(float64) bool) List {
 func (ego *list) IntSum() (result int) {
 	for _, item := range ego.val {
 		value, ok := item.getVal().(int)
-		if !ok {
-			panic("all elements have to be ints")
+		if ok {
+			result += value
 		}
-		result += value
 	}
 	return
 }
@@ -832,10 +831,7 @@ func (ego *list) Sum() (result float64) {
 			result += float64(val)
 		} else if val, ok := item.getVal().(float64); ok {
 			result += val
-		} else {
-			panic("all elements have to be numeric")
 		}
-
 	}
 	return result
 }
@@ -844,10 +840,9 @@ func (ego *list) IntProd() (result int) {
 	result = 1
 	for _, item := range ego.val {
 		value, ok := item.getVal().(int)
-		if !ok {
-			panic("all elements have to be ints")
+		if ok {
+			result *= value
 		}
-		result *= value
 	}
 	return
 }
@@ -860,8 +855,6 @@ func (ego *list) Prod() (result float64) {
 			result *= float64(val)
 		} else if val, ok := item.getVal().(float64); ok {
 			result *= val
-		} else {
-			panic("all elements have to be numeric")
 		}
 	}
 	return result

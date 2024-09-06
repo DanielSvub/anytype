@@ -580,26 +580,6 @@ func TestListPanics(t *testing.T) {
 		List(false).Sort()
 	})
 
-	t.Run("invalidSum", func(t *testing.T) {
-		defer catch("computing sum of unsupported list did not cause panic")
-		List(false).Sum()
-	})
-
-	t.Run("invalidIntSum", func(t *testing.T) {
-		defer catch("computing int sum of unsupported list did not cause panic")
-		List(3.14).IntSum()
-	})
-
-	t.Run("invalidProd", func(t *testing.T) {
-		defer catch("computing product of unsupported list did not cause panic")
-		List(false).Prod()
-	})
-
-	t.Run("invalidIntProd", func(t *testing.T) {
-		defer catch("computing int product of unsupported list did not cause panic")
-		List(3.14).IntProd()
-	})
-
 	t.Run("invalidGetTF", func(t *testing.T) {
 		defer catch("getting invalid tree form did not cause panic")
 		List().GetTF("")
