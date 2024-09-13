@@ -264,6 +264,11 @@ func TestObject(t *testing.T) {
 		)) {
 			t.Error("MapStrings does not work properly")
 		}
+		if !o.MapBools(func(value bool) any { return value }).Equals(Object(
+			"bool", true,
+		)) {
+			t.Error("MapBools does not work properly")
+		}
 		if !o.MapInts(func(value int) any { return value }).Equals(Object(
 			"int", 1,
 		)) {

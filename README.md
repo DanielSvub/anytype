@@ -258,6 +258,10 @@ strs := object.MapStrings(func(str string) any {
     // ...
 	return newValue
 })
+booleans := object.MapBools(func(boolean bool) any {
+    // ...
+	return newValue
+})
 integers := object.MapInts(func(integer int) any {
     // ...
 	return newValue
@@ -568,6 +572,10 @@ lists := list.MapLists(func(list anytype.List) any {
 	return newValue
 })
 strs := list.MapStrings(func(str string) any {
+    // ...
+	return newValue
+})
+booleans := list.MapBools(func(boolean bool) any {
     // ...
 	return newValue
 })

@@ -599,6 +599,21 @@ type List interface {
 	MapStrings(function func(x string) any) List
 
 	/*
+		MapBools selects all bools from the list and modifies each of them by a given mapping function.
+		Elements of other types are ignored.
+		The resulting element can have a different type than the original one.
+		The function has one parameter, the current bool, and returns any.
+		The old list remains unchanged.
+
+		Parameters:
+		  - function - anonymous function to be executed.
+
+		Returns:
+		  - new list.
+	*/
+	MapBools(function func(x bool) any) List
+
+	/*
 		MapInts selects all ints from the list and modifies each of them by a given mapping function.
 		Elements of other types are ignored.
 		The resulting element can have a different type than the original one.

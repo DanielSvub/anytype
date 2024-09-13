@@ -402,6 +402,9 @@ func TestList(t *testing.T) {
 		if !l.MapStrings(func(value string) any { return value }).Equals(List("test")) {
 			t.Error("MapStrings does not work properly")
 		}
+		if !l.MapBools(func(value bool) any { return value }).Equals(List(true)) {
+			t.Error("MapBools does not work properly")
+		}
 		if !l.MapInts(func(value int) any { return value }).Equals(List(1)) {
 			t.Error("MapInts does not work properly")
 		}

@@ -686,6 +686,17 @@ func (ego *list) MapStrings(function func(string) any) List {
 	return result
 }
 
+func (ego *list) MapBools(function func(bool) any) List {
+	result := NewList()
+	for _, item := range ego.val {
+		val, ok := item.getVal().(bool)
+		if ok {
+			result.Add(function(val))
+		}
+	}
+	return result
+}
+
 func (ego *list) MapInts(function func(int) any) List {
 	result := NewList()
 	for _, item := range ego.val {

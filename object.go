@@ -469,6 +469,21 @@ type Object interface {
 	MapStrings(function func(x string) any) Object
 
 	/*
+		MapBools selects all bools in the object and modifies each of them by a given mapping function.
+		Fields with other types are ignored.
+		The resulting field can have a different type than the original one.
+		The function has one parameter, the current bool, and returns empty interface.
+		The old object remains unchanged.
+
+		Parameters:
+		  - function - anonymous function to be executed.
+
+		Returns:
+		  - new object.
+	*/
+	MapBools(function func(x bool) any) Object
+
+	/*
 		MapInts selects all ints in the object and modifies each of them by a given mapping function.
 		Fields with other types are ignored.
 		The resulting field can have a different type than the original one.

@@ -486,6 +486,17 @@ func (ego *object) MapStrings(function func(string) any) Object {
 	return result
 }
 
+func (ego *object) MapBools(function func(bool) any) Object {
+	result := NewObject()
+	for key, item := range ego.val {
+		val, ok := item.getVal().(bool)
+		if ok {
+			result.Set(key, function(val))
+		}
+	}
+	return result
+}
+
 func (ego *object) MapInts(function func(int) any) Object {
 	result := NewObject()
 	for key, item := range ego.val {
