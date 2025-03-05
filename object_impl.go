@@ -571,20 +571,11 @@ func (ego *object) GetTF(tf string) any {
 	hash := strings.Index(tf, "#")
 	if dot > 0 && (hash < 0 || dot < hash) {
 		key := tf[:dot]
-		if !ego.ptr.KeyExists(key) || ego.ptr.TypeOf(key) != TypeObject {
-			return nil
-		}
 		return ego.Ego().GetObject(key).GetTF(tf[dot:])
 	}
 	if hash > 0 && (dot < 0 || hash < dot) {
 		key := tf[:hash]
-		if !ego.ptr.KeyExists(key) || ego.ptr.TypeOf(key) != TypeList {
-			return nil
-		}
 		return ego.Ego().GetList(key).GetTF(tf[hash:])
-	}
-	if !ego.ptr.KeyExists(tf) {
-		return nil
 	}
 	return ego.Ego().Get(tf)
 }
@@ -621,4 +612,31 @@ func (ego *object) SetTF(tf string, value any) Object {
 		return ego.Ego()
 	}
 	return ego.Ego().Set(tf, value)
+}
+
+func (ego *object) TypeOfTF(tf string) Type {
+	if len(tf) < 2 || tf[0] != '.' {
+		return TypeUndefined
+	}
+	tf = tf[1:]
+	dot := strings.Index(tf, ".")
+	hash := strings.Index(tf, "#")
+	if dot > 0 && (hash < 0 || dot < hash) {
+		key := tf[:dot]
+		if !ego.ptr.KeyExists(key) || ego.ptr.TypeOf(key) != TypeObject {
+			return TypeUndefined
+		}
+		return ego.Ego().GetObject(key).TypeOfTF(tf[dot:])
+	}
+	if hash > 0 && (dot < 0 || hash < dot) {
+		key := tf[:hash]
+		if !ego.ptr.KeyExists(key) || ego.ptr.TypeOf(key) != TypeList {
+			return TypeUndefined
+		}
+		return ego.Ego().GetList(key).TypeOfTF(tf[hash:])
+	}
+	if !ego.ptr.KeyExists(tf) {
+		return TypeUndefined
+	}
+	return ego.Ego().TypeOf(tf)
 }

@@ -352,7 +352,8 @@ type List interface {
 
 	/*
 		Sort sorts elements in the list (ascending).
-		The list has to be homogeneous, all elements have to be either strings, ints or floats.
+		The first element of the list determines the sorting type and has to be either string, int or float.
+		Values of other types are ignored.
 
 		Returns:
 		  - updated list.
@@ -907,4 +908,16 @@ type List interface {
 		  - updated list.
 	*/
 	SetTF(tf string, value any) List
+
+	/*
+		TypeOfTF gives a type of the element specified by a given tree form.
+		If the TF path does not exist, 0 (TypeUndefined) is returned.
+
+		Parameters:
+		  - tf - tree form string.
+
+		Returns:
+		  - integer constant representing the type (see type enum).
+	*/
+	TypeOfTF(tf string) Type
 }

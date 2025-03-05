@@ -15,6 +15,8 @@ Types can be referenced by the `Type` enum (e.g. `TypeNil`, `TypeObject`, ...). 
 
 AnyType also allows usage of so-called "tree form" for accessing values. It is a string using hash for list elements and dot for object fields. For example `#1.a.b#4` or `.d.c#5#0`.
 
+The library is tested with 100% coverage.
+
 ## Objects
 
 Object is an unordered set of key-value pairs, the keys are of type string. The default implementation is based on built-in Go maps. It is possible to make custom implementations by implementing the `Object` interface.
@@ -297,6 +299,13 @@ value := object.GetTF(".first#2")
 - `SetTF(tf string, value any) Object` - sets a value on the path specified by the given tree form string.
 ```go
 object.SetTF(".first#2", 2)
+```
+
+- `TypeOfTF(tf string) Type` - returns a type of the field specified by the given tree form string,
+```go
+if object.TypeOfTF("#2.first") == anytype.TypeInt {
+    // ...
+}
 ```
 
 ## Lists
@@ -713,6 +722,13 @@ value := list.GetTF("#2.first")
 - `SetTF(tf string, value any) List` - sets a value on the path specified by the given tree form string.
 ```go
 list.SetTF("#2.first", 2)
+```
+
+- `TypeOfTF(tf string) Type` - returns a type of the element specified by the given tree form string,
+```go
+if list.TypeOfTF("#2.first") == anytype.TypeInt {
+    // ...
+}
 ```
 
 ## Derived Structures

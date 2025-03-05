@@ -156,25 +156,59 @@ func TestTF(t *testing.T) {
 		}
 	})
 
+	t.Run("types", func(t *testing.T) {
+		l := List(
+			Object("test", 0, "list", List("test")),
+			List(0),
+		)
+		if l.TypeOfTF("#1#0") != anytype.TypeInt {
+			t.Error("tree form type check does not work properly")
+		}
+		if l.TypeOfTF("#0.test") != anytype.TypeInt {
+			t.Error("tree form type check does not work properly")
+		}
+		if l.TypeOfTF("#0.list#0") != anytype.TypeString {
+			t.Error("invalid TF is not undefined")
+		}
+	})
+
 	t.Run("invalid", func(t *testing.T) {
 		l := List().SetTF("#0#0.test.inner#0", 5)
-		if l.GetTF("#5") != nil {
-			t.Error("invalid TF does not return nil")
+		if Object().TypeOfTF("invalid") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
 		}
-		if l.GetTF("#0#0#0") != nil {
-			t.Error("invalid TF does not return nil")
+		if l.TypeOfTF("invalid") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
 		}
-		if l.GetTF("#0#0.nil") != nil {
-			t.Error("invalid TF does not return nil")
+		if l.TypeOfTF("invalid") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
 		}
-		if l.GetTF("#0#0.test#0") != nil {
-			t.Error("invalid TF does not return nil")
+		if l.TypeOfTF("#5") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
 		}
-		if l.GetTF("#0.test") != nil {
-			t.Error("invalid TF does not return nil")
+		if l.TypeOfTF("#0#0#0") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
 		}
-		if l.GetTF("#0#0.test.inner.nil") != nil {
-			t.Error("invalid TF does not return nil")
+		if l.TypeOfTF("#0#0.nil") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
+		}
+		if l.TypeOfTF("#0#0.test#0") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
+		}
+		if l.TypeOfTF("#0.test") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
+		}
+		if l.TypeOfTF("#0#0.test.inner.nil") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
+		}
+		if l.TypeOfTF("#invalid") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
+		}
+		if l.TypeOfTF("#invalid.test") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
+		}
+		if l.TypeOfTF("#invalid#0") != anytype.TypeUndefined {
+			t.Error("invalid TF is not undefined")
 		}
 	})
 

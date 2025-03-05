@@ -1016,10 +1016,6 @@ func (ego *list) GetTF(tf string) any {
 		if err != nil {
 			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:dot]))
 		}
-		index := int(integer)
-		if index >= ego.ptr.Count() || ego.ptr.TypeOf(index) != TypeObject {
-			return nil
-		}
 		return ego.Ego().GetObject(int(integer)).GetTF(tf[dot:])
 	}
 	if hash > 0 && (dot < 0 || hash < dot) {
@@ -1027,21 +1023,13 @@ func (ego *list) GetTF(tf string) any {
 		if err != nil {
 			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:hash]))
 		}
-		index := int(integer)
-		if index >= ego.ptr.Count() || ego.ptr.TypeOf(index) != TypeList {
-			return nil
-		}
-		return ego.Ego().GetList(index).GetTF(tf[hash:])
+		return ego.Ego().GetList(int(integer)).GetTF(tf[hash:])
 	}
 	integer, err := strconv.ParseInt(tf, 0, bits.UintSize)
 	if err != nil {
 		panic(fmt.Sprintf("'%s' cannot be converted to int", tf))
 	}
-	index := int(integer)
-	if index >= ego.ptr.Count() {
-		return nil
-	}
-	return ego.Ego().Get(index)
+	return ego.Ego().Get(int(integer))
 }
 
 func (ego *list) SetTF(tf string, value any) List {
@@ -1086,4 +1074,44 @@ func (ego *list) SetTF(tf string, value any) List {
 		panic(fmt.Sprintf("'%s' cannot be converted to int", tf))
 	}
 	return ego.Ego().Insert(int(integer), value)
+}
+
+func (ego *list) TypeOfTF(tf string) Type {
+	if len(tf) < 2 || tf[0] != '#' {
+		return TypeUndefined
+	}
+	tf = tf[1:]
+	dot := strings.Index(tf, ".")
+	hash := strings.Index(tf, "#")
+	if dot > 0 && (hash < 0 || dot < hash) {
+		integer, err := strconv.ParseInt(tf[:dot], 0, bits.UintSize)
+		if err != nil {
+			return TypeUndefined
+		}
+		index := int(integer)
+		if index >= ego.Ego().Count() || ego.Ego().TypeOf(index) != TypeObject {
+			return TypeUndefined
+		}
+		return ego.Ego().GetObject(int(integer)).TypeOfTF(tf[dot:])
+	}
+	if hash > 0 && (dot < 0 || hash < dot) {
+		integer, err := strconv.ParseInt(tf[:hash], 0, bits.UintSize)
+		if err != nil {
+			return TypeUndefined
+		}
+		index := int(integer)
+		if index >= ego.Ego().Count() || ego.Ego().TypeOf(index) != TypeList {
+			return TypeUndefined
+		}
+		return ego.Ego().GetList(index).TypeOfTF(tf[hash:])
+	}
+	integer, err := strconv.ParseInt(tf, 0, bits.UintSize)
+	if err != nil {
+		return TypeUndefined
+	}
+	index := int(integer)
+	if index >= ego.ptr.Count() {
+		return TypeUndefined
+	}
+	return ego.Ego().TypeOf(index)
 }

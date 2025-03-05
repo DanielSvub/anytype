@@ -562,4 +562,16 @@ type Object interface {
 		  - updated object.
 	*/
 	SetTF(tf string, value any) Object
+
+	/*
+		TypeOfTF gives a type of the field specified by a given tree form.
+		If the TF path does not exist, 0 (TypeUndefined) is returned.
+
+		Parameters:
+		  - tf - tree form string.
+
+		Returns:
+		  - integer constant representing the type (see type enum).
+	*/
+	TypeOfTF(tf string) Type
 }
