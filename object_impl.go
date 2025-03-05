@@ -52,40 +52,51 @@ Returns:
   - created object.
 */
 func NewObjectFrom(dict any) Object {
-	object := NewObject()
+	var ego Object
+	init := func(cap int) {
+		ego = &object{val: make(map[string]field, cap)}
+		ego.Init(ego)
+	}
 	switch s := dict.(type) {
 	case map[string]any:
+		init(len(s))
 		for key, value := range s {
-			object.Set(key, value)
+			ego.Set(key, value)
 		}
 	case map[string]Object:
+		init(len(s))
 		for key, value := range s {
-			object.Set(key, value)
+			ego.Set(key, value)
 		}
 	case map[string]List:
+		init(len(s))
 		for key, value := range s {
-			object.Set(key, value)
+			ego.Set(key, value)
 		}
 	case map[string]string:
+		init(len(s))
 		for key, value := range s {
-			object.Set(key, value)
+			ego.Set(key, value)
 		}
 	case map[string]bool:
+		init(len(s))
 		for key, value := range s {
-			object.Set(key, value)
+			ego.Set(key, value)
 		}
 	case map[string]int:
+		init(len(s))
 		for key, value := range s {
-			object.Set(key, value)
+			ego.Set(key, value)
 		}
 	case map[string]float64:
+		init(len(s))
 		for key, value := range s {
-			object.Set(key, value)
+			ego.Set(key, value)
 		}
 	default:
 		panic("unsupported map type")
 	}
-	return object
+	return ego
 }
 
 /*

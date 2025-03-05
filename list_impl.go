@@ -56,11 +56,11 @@ Returns:
   - pointer to the created list.
 */
 func NewListOf(value any, count int) List {
-	ego := &list{val: make([]field, count)}
+	ego := &list{val: make([]field, 0, count)}
 	ego.Init(ego)
 	elem := parseVal(value)
-	for i := 0; i < ego.Ego().Count(); i++ {
-		ego.val[i] = elem
+	for i := 0; i < count; i++ {
+		ego.val = append(ego.val, elem)
 	}
 	return ego
 }
@@ -75,33 +75,44 @@ Returns:
   - created list.
 */
 func NewListFrom(slice any) List {
-	ego := NewList()
+	var ego List
+	init := func(cap int) {
+		ego = &list{val: make([]field, 0, cap)}
+		ego.Init(ego)
+	}
 	switch s := slice.(type) {
 	case []any:
+		init(len(s))
 		for _, item := range s {
 			ego.Add(item)
 		}
 	case []Object:
+		init(len(s))
 		for _, item := range s {
 			ego.Add(item)
 		}
 	case []List:
+		init(len(s))
 		for _, item := range s {
 			ego.Add(item)
 		}
 	case []string:
+		init(len(s))
 		for _, item := range s {
 			ego.Add(item)
 		}
 	case []bool:
+		init(len(s))
 		for _, item := range s {
 			ego.Add(item)
 		}
 	case []int:
+		init(len(s))
 		for _, item := range s {
 			ego.Add(item)
 		}
 	case []float64:
+		init(len(s))
 		for _, item := range s {
 			ego.Add(item)
 		}
@@ -330,7 +341,7 @@ func (ego *list) FormatString(indent int) string {
 }
 
 func (ego *list) Slice() []any {
-	slice := []any{}
+	slice := make([]any, 0, ego.Ego().Count())
 	for _, item := range ego.val {
 		slice = append(slice, item.getVal())
 	}
@@ -338,7 +349,7 @@ func (ego *list) Slice() []any {
 }
 
 func (ego *list) ObjectSlice() []Object {
-	slice := []Object{}
+	slice := make([]Object, 0, ego.Ego().Count())
 	for _, item := range ego.val {
 		object, ok := item.(Object)
 		if ok {
@@ -349,7 +360,7 @@ func (ego *list) ObjectSlice() []Object {
 }
 
 func (ego *list) ListSlice() []List {
-	slice := []List{}
+	slice := make([]List, 0, ego.Ego().Count())
 	for _, item := range ego.val {
 		list, ok := item.(List)
 		if ok {
@@ -360,7 +371,7 @@ func (ego *list) ListSlice() []List {
 }
 
 func (ego *list) StringSlice() []string {
-	slice := []string{}
+	slice := make([]string, 0, ego.Ego().Count())
 	for _, item := range ego.val {
 		str, ok := item.getVal().(string)
 		if ok {
@@ -371,7 +382,7 @@ func (ego *list) StringSlice() []string {
 }
 
 func (ego *list) BoolSlice() []bool {
-	slice := []bool{}
+	slice := make([]bool, 0, ego.Ego().Count())
 	for _, item := range ego.val {
 		boolean, ok := item.getVal().(bool)
 		if ok {
@@ -382,7 +393,7 @@ func (ego *list) BoolSlice() []bool {
 }
 
 func (ego *list) IntSlice() []int {
-	slice := []int{}
+	slice := make([]int, 0, ego.Ego().Count())
 	for _, item := range ego.val {
 		integer, ok := item.getVal().(int)
 		if ok {
@@ -393,7 +404,7 @@ func (ego *list) IntSlice() []int {
 }
 
 func (ego *list) FloatSlice() []float64 {
-	slice := []float64{}
+	slice := make([]float64, 0, ego.Ego().Count())
 	for _, item := range ego.val {
 		float, ok := item.getVal().(float64)
 		if ok {
@@ -477,7 +488,7 @@ func (ego *list) Sort() List {
 		sort.Float64s(slice)
 		ego.val = NewListFrom(slice).(*list).val
 	default:
-		panic("list has to be homogeneous with all elements either strings, ints or floats")
+		panic("the first element of the list has to be either string, int or float")
 	}
 	return ego.Ego()
 }

@@ -470,7 +470,7 @@ if list.Contains("value") {
 elem := list.IndexOf("value")
 ```
 
-- `Sort() List` - sorts the elements in the list. List has to be homogeneous and the elements have to be either numeric or strings,
+- `Sort() List` - sorts the elements in the list. The sorting type is determined by the first element which has to be either string, int or float,
 ```go
 list.Sort()
 ```
