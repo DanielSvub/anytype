@@ -564,7 +564,7 @@ func (ego *object) MapAsync(function func(string, any) any) Object {
 
 func (ego *object) GetTF(tf string) any {
 	if len(tf) < 2 || tf[0] != '.' {
-		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
+		panic(fmt.Sprintf("'%s' is not a valid tree form for an object", tf))
 	}
 	tf = tf[1:]
 	dot := strings.Index(tf, ".")
@@ -582,7 +582,7 @@ func (ego *object) GetTF(tf string) any {
 
 func (ego *object) SetTF(tf string, value any) Object {
 	if len(tf) < 2 || tf[0] != '.' {
-		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
+		panic(fmt.Sprintf("'%s' is not a valid tree form for an object", tf))
 	}
 	tf = tf[1:]
 	dot := strings.Index(tf, ".")

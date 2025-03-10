@@ -1006,7 +1006,7 @@ func (ego *list) MapAsync(function func(int, any) any) List {
 
 func (ego *list) GetTF(tf string) any {
 	if len(tf) < 2 || tf[0] != '#' {
-		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
+		panic(fmt.Sprintf("'%s' is not a valid tree form for a list", tf))
 	}
 	tf = tf[1:]
 	dot := strings.Index(tf, ".")
@@ -1034,7 +1034,7 @@ func (ego *list) GetTF(tf string) any {
 
 func (ego *list) SetTF(tf string, value any) List {
 	if len(tf) < 2 || tf[0] != '#' {
-		panic(fmt.Sprintf("'%s' is not a valid tree form", tf))
+		panic(fmt.Sprintf("'%s' is not a valid tree form for a list", tf))
 	}
 	tf = tf[1:]
 	dot := strings.Index(tf, ".")
