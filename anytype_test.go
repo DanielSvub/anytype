@@ -143,9 +143,12 @@ func TestTF(t *testing.T) {
 
 	t.Run("valid", func(t *testing.T) {
 		l := List()
+		l.SetTF("#0", 0)
 		l.SetTF("#0#0", 0)
 		l.SetTF("#0#0.test", 1)
+		l.SetTF("#0#0.test", 2)
 		l.SetTF("#0#1", 2).SetTF("#0#2.test.inner#0", 1)
+		l.SetTF("#0#1", 3)
 		l.SetTF("#0#2.test.inner#1.target#0", 5)
 		result, ok := l.GetTF("#0#2.test.inner#1.target#0").(int)
 		if !ok || result != 5 {
