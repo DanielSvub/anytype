@@ -364,4 +364,9 @@ func TestObjectPanics(t *testing.T) {
 		Object().SetTF("", 0)
 	})
 
+	t.Run("invalidUnsetTF", func(t *testing.T) {
+		defer catch("unsetting invalid tree form did not cause panic")
+		Object().UnsetTF("")
+	})
+
 }

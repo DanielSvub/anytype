@@ -623,4 +623,24 @@ func TestListPanics(t *testing.T) {
 		List().SetTF("#test#0", 0)
 	})
 
+	t.Run("invalidUnsetTF", func(t *testing.T) {
+		defer catch("unsetting invalid tree form did not cause panic")
+		List().UnsetTF("")
+	})
+
+	t.Run("invalidUnsetTFIndex", func(t *testing.T) {
+		defer catch("unsetting tree form with invalid index did not cause panic")
+		List().UnsetTF("#test")
+	})
+
+	t.Run("invalidUnsetTFIndexObject", func(t *testing.T) {
+		defer catch("unsetting tree form with invalid index and nested object did not cause panic")
+		List().UnsetTF("#test.test")
+	})
+
+	t.Run("invalidUnsetTFIndexNested", func(t *testing.T) {
+		defer catch("unsetting tree form with invalid index did not cause panic")
+		List().UnsetTF("#test#0")
+	})
+
 }

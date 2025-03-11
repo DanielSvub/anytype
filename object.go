@@ -564,6 +564,18 @@ type Object interface {
 	SetTF(tf string, value any) Object
 
 	/*
+		Unset deletes the value specified by a given tree form.
+		If the TF path does not exist, nothing happens.
+
+		Parameters:
+		  - tf - tree form string.
+
+		Returns:
+		  - updated object.
+	*/
+	UnsetTF(tf string) Object
+
+	/*
 		TypeOfTF gives a type of the field specified by a given tree form.
 		If the TF path does not exist, 0 (TypeUndefined) is returned.
 

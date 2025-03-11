@@ -1092,6 +1092,38 @@ func (ego *list) SetTF(tf string, value any) List {
 	return ego.Ego().Replace(index, value)
 }
 
+func (ego *list) UnsetTF(tf string) List {
+	if len(tf) < 2 || tf[0] != '#' {
+		panic(fmt.Sprintf("'%s' is not a valid tree form for a list", tf))
+	}
+	tf = tf[1:]
+	dot := strings.Index(tf, ".")
+	hash := strings.Index(tf, "#")
+	if dot > 0 && (hash < 0 || dot < hash) {
+		integer, err := strconv.ParseInt(tf[:dot], 0, bits.UintSize)
+		if err != nil {
+			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:dot]))
+		}
+		object := ego.GetObject(int(integer))
+		object.UnsetTF(tf[dot:])
+		return ego.Ego()
+	}
+	if hash > 0 && (dot < 0 || hash < dot) {
+		integer, err := strconv.ParseInt(tf[:hash], 0, bits.UintSize)
+		if err != nil {
+			panic(fmt.Sprintf("'%s' cannot be converted to int", tf[:hash]))
+		}
+		list := ego.GetList(int(integer))
+		list.UnsetTF(tf[hash:])
+		return ego.Ego()
+	}
+	integer, err := strconv.ParseInt(tf, 0, bits.UintSize)
+	if err != nil {
+		panic(fmt.Sprintf("'%s' cannot be converted to int", tf))
+	}
+	return ego.Ego().Delete(int(integer))
+}
+
 func (ego *list) TypeOfTF(tf string) Type {
 	if len(tf) < 2 || tf[0] != '#' {
 		return TypeUndefined

@@ -175,6 +175,34 @@ func TestTF(t *testing.T) {
 		}
 	})
 
+	t.Run("unset", func(t *testing.T) {
+		l := List(
+			Object(
+				"test", 0,
+				"list", List("test"),
+				"object", Object("test", 0),
+			),
+			0,
+			1,
+			List(0),
+		)
+		if l.UnsetTF("#1").GetInt(1) != 1 {
+			t.Error("unsetting by TF does not work properly")
+		}
+		if l.UnsetTF("#0.test").GetObject(0).TypeOf("test") != anytype.TypeUndefined {
+			t.Error("unsetting by TF does not work properly")
+		}
+		if !l.UnsetTF("#2#0").GetList(2).Empty() {
+			t.Error("unsetting by TF does not work properly")
+		}
+		if !l.UnsetTF("#0.list#0").GetObject(0).GetList("list").Empty() {
+			t.Error("unsetting by TF does not work properly")
+		}
+		if !l.UnsetTF("#0.object.test").GetObject(0).GetObject("object").Empty() {
+			t.Error("unsetting by TF does not work properly")
+		}
+	})
+
 	t.Run("invalid", func(t *testing.T) {
 		l := List().SetTF("#0#0.test.inner#0", 5)
 		if Object().TypeOfTF("invalid") != anytype.TypeUndefined {

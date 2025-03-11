@@ -296,14 +296,19 @@ mapped := object.MapAsync(func(key string, value any) any {
 value := object.GetTF(".first#2")
 ```
 
-- `SetTF(tf string, value any) Object` - sets a value on the path specified by the given tree form string.
+- `SetTF(tf string, value any) Object` - sets a value on the path specified by the given tree form string,
 ```go
 object.SetTF(".first#2", 2)
 ```
 
-- `TypeOfTF(tf string) Type` - returns a type of the field specified by the given tree form string,
+- `UnsetTF(tf string) Object` - unsets a value on the path specified by the given tree form string,
 ```go
-if object.TypeOfTF("#2.first") == anytype.TypeInt {
+object.UnsetTF(".first#2")
+```
+
+- `TypeOfTF(tf string) Type` - returns a type of the field specified by the given tree form string.
+```go
+if object.TypeOfTF(".first#2") == anytype.TypeInt {
     // ...
 }
 ```
@@ -719,12 +724,17 @@ mapped := list.MapAsync(func(index int, value any) any {
 value := list.GetTF("#2.first")
 ```
 
-- `SetTF(tf string, value any) List` - sets a value on the path specified by the given tree form string.
+- `SetTF(tf string, value any) List` - sets a value on the path specified by the given tree form string,
 ```go
 list.SetTF("#2.first", 2)
 ```
 
-- `TypeOfTF(tf string) Type` - returns a type of the element specified by the given tree form string,
+- `UnsetTF(tf string) List` - unsets a value on the path specified by the given tree form string,
+```go
+list.UnsetTF("#2.first")
+```
+
+- `TypeOfTF(tf string) Type` - returns a type of the element specified by the given tree form string.
 ```go
 if list.TypeOfTF("#2.first") == anytype.TypeInt {
     // ...

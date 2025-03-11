@@ -910,6 +910,18 @@ type List interface {
 	SetTF(tf string, value any) List
 
 	/*
+		Unset deletes the value specified by a given tree form.
+		If the TF path does not exist, nothing happens.
+
+		Parameters:
+		  - tf - tree form string.
+
+		Returns:
+		  - updated object.
+	*/
+	UnsetTF(tf string) List
+
+	/*
 		TypeOfTF gives a type of the element specified by a given tree form.
 		If the TF path does not exist, 0 (TypeUndefined) is returned.
 
