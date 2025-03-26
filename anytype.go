@@ -42,7 +42,7 @@ Parameters:
   - val - value to convert
 
 Returns:
-  - field, ready to add to object or list
+  - field, ready to add to object or list.
 */
 func parseVal(val any) field {
 	switch v := val.(type) {
@@ -110,6 +110,33 @@ func parseVal(val any) field {
 		return newNil()
 	default:
 		panic("incompatible type")
+	}
+}
+
+/*
+Recursively converts an AnyType value to a native Go value.
+Parameters:
+  - val - value to convert
+
+Returns:
+  - nested native Go structure.
+*/
+func native(value any) any {
+	switch v := value.(type) {
+	case Object:
+		result := make(map[string]any)
+		v.ForEach(func(key string, val any) {
+			result[key] = native(val)
+		})
+		return result
+	case List:
+		result := make([]any, 0, v.Count())
+		v.ForEachValue(func(h any) {
+			result = append(result, native(h))
+		})
+		return result
+	default:
+		return v
 	}
 }
 

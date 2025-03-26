@@ -1,6 +1,7 @@
 package anytype_test
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -240,6 +241,44 @@ func TestTF(t *testing.T) {
 		}
 		if l.TypeOfTF("#invalid#0") != anytype.TypeUndefined {
 			t.Error("invalid TF is not undefined")
+		}
+	})
+
+}
+
+func TestNative(t *testing.T) {
+
+	t.Run("maps", func(t *testing.T) {
+		m := map[string]any{
+			"nil":    nil,
+			"string": "test",
+			"bool":   true,
+			"int":    1,
+			"float":  3.14,
+			"map": map[string]any{
+				"nested": "test",
+			},
+			"slice": []any{1, 2, 3},
+		}
+		if !reflect.DeepEqual(m, ObjectFrom(m).NativeDict()) {
+			t.Error("conversion to native map does not work properly")
+		}
+	})
+
+	t.Run("slices", func(t *testing.T) {
+		s := []any{
+			nil,
+			"test",
+			true,
+			1,
+			3.14,
+			map[string]any{
+				"nested": "test",
+			},
+			[]any{1, 2, 3},
+		}
+		if !reflect.DeepEqual(s, ListFrom(s).NativeSlice()) {
+			t.Error("conversion to native map does not work properly")
 		}
 	})
 

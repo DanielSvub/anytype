@@ -182,6 +182,15 @@ type Object interface {
 	Dict() map[string]any
 
 	/*
+		NativeDict converts the object into a Go map of empty interfaces.
+		All nested objects and lists are converted recursively.
+
+		Returns:
+		  - map.
+	*/
+	NativeDict() map[string]any
+
+	/*
 		Keys convers the object to a list of its keys.
 
 		Returns:

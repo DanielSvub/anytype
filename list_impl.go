@@ -348,6 +348,10 @@ func (ego *list) Slice() []any {
 	return slice
 }
 
+func (ego *list) NativeSlice() []any {
+	return native(ego).([]any)
+}
+
 func (ego *list) ObjectSlice() []Object {
 	slice := make([]Object, 0, ego.Ego().Count())
 	for _, item := range ego.val {

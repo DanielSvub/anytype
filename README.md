@@ -124,6 +124,12 @@ var dict map[string]any
 dict = object.Dict()
 ```
 
+- `NativeDict() map[string]any` - recursively exports the object into a Go map (nested objects and lists are converted too),
+```go
+var dict map[string]any
+dict = object.NativeDict()
+```
+
 - `Keys() List` - exports all keys of the object into an AnyType list,
 ```go
 var keys anytype.List
@@ -417,6 +423,12 @@ fmt.Println(list.FormatString(4))
 ```go
 var slice []any
 slice = list.Slice()
+```
+
+- `NativeSlice() []any` - recursively exports the list into a Go slice (nested objects and lists are converted too),
+```go
+var slice []any
+slice = list.NativeSlice()
 ```
 
 - export into type-specific slices - values of other types are ignored,

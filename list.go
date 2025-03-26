@@ -212,6 +212,15 @@ type List interface {
 	Slice() []any
 
 	/*
+		NativeSlice converts the list into a Go slice of any.
+		All nested objects and lists are converted recursively.
+
+		Returns:
+		  - slice.
+	*/
+	NativeSlice() []any
+
+	/*
 		ObjectSlice converts the list of objects into a Go slice.
 		Elements of other types are ignored.
 

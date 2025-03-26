@@ -303,6 +303,10 @@ func (ego *object) Dict() map[string]any {
 	return dict
 }
 
+func (ego *object) NativeDict() map[string]any {
+	return native(ego).(map[string]any)
+}
+
 func (ego *object) Keys() List {
 	keys := NewList()
 	for key := range ego.val {
