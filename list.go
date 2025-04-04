@@ -908,6 +908,7 @@ type List interface {
 
 	/*
 		SetTF sets a value specified by a given tree form.
+		If the index exceeds the count, the interspace will be filled with nils.
 
 		Parameters:
 		  - tf - tree form string,

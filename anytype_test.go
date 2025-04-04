@@ -155,8 +155,14 @@ func TestTF(t *testing.T) {
 		if !ok || result != 5 {
 			t.Error("tree form handling does not work properly")
 		}
-		if l.GetTF("#0#2.test") == nil {
+		if l.GetTF("#0#0.test") != 2 {
 			t.Error("valid TF returns nil")
+		}
+		if !List().SetTF("#2#2.test#1", 1).Equals(List(
+			nil,
+			nil,
+			List(nil, nil, Object("test", List(nil, 1))))) {
+			t.Error("setting count exceeding indexes does not work properly")
 		}
 	})
 

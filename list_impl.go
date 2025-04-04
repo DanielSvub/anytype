@@ -1050,8 +1050,12 @@ func (ego *list) SetTF(tf string, value any) List {
 		}
 		var object Object
 		index := int(integer)
-		if index == ego.Ego().Count() {
+		count := ego.Ego().Count()
+		if index >= count {
 			object = NewObject()
+			for i := 0; i < index-count; i++ {
+				ego.Ego().Add(nil)
+			}
 			ego.Ego().Add(object)
 		} else {
 			if ego.Ego().TypeOf(index) == TypeObject {
@@ -1071,8 +1075,12 @@ func (ego *list) SetTF(tf string, value any) List {
 		}
 		var list List
 		index := int(integer)
-		if index == ego.Ego().Count() {
+		count := ego.Ego().Count()
+		if index >= count {
 			list = NewList()
+			for i := 0; i < index-count; i++ {
+				ego.Ego().Add(nil)
+			}
 			ego.Ego().Add(list)
 		} else {
 			if ego.Ego().TypeOf(index) == TypeList {
@@ -1090,7 +1098,11 @@ func (ego *list) SetTF(tf string, value any) List {
 	if err != nil {
 		panic(fmt.Sprintf("'%s' cannot be converted to int", tf))
 	}
-	if index == ego.Ego().Count() {
+	count := ego.Ego().Count()
+	if index >= count {
+		for i := 0; i < index-count; i++ {
+			ego.Ego().Add(nil)
+		}
 		return ego.Ego().Add(value)
 	}
 	return ego.Ego().Replace(index, value)
